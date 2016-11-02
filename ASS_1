@@ -1,0 +1,104 @@
+/*
+C.Timm  10/31/2016 Blinking LED with button
+
+Changes blink LEDs with two buttons
+
+Button: Pin 7 & 8
+LED's: Pins 9 through 12
+*/
+#include <Wire.h>
+
+const char ledA = 9, ledB = 10, ledC = 11, ledD = 12;
+
+const char btnA = 7, btnB = 8;
+const int longDelay = 500; //ms
+const int shortDelay = 100; //ms
+
+int bigDelay();
+int littleDelay();
+
+int msDelay = bigDelay() ;// delay time for blink
+
+void setup() {
+  // put your setup code here, to run once:
+pinMode(ledA, OUTPUT);
+pinMode(ledB, OUTPUT);
+pinMode(ledC, OUTPUT);
+pinMode(ledD, OUTPUT);
+
+pinMode(btnA,INPUT);
+pinMode(btnB,INPUT);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //If btnA is pressed
+
+
+ if(digitalRead(btnA) == 0 ) //0 = pressed
+ {
+   
+    digitalWrite(ledA,HIGH);
+    delay(msDelay);
+    digitalWrite(ledA,LOW);
+    delay(msDelay);
+    
+     digitalWrite(ledB,HIGH);
+    delay(msDelay);
+    digitalWrite(ledB,LOW);
+    delay(msDelay);
+    
+     digitalWrite(ledC,HIGH);
+    delay(msDelay);
+    digitalWrite(ledC,LOW);
+    delay(msDelay);
+    
+     digitalWrite(ledD,HIGH);
+    delay(msDelay);
+    digitalWrite(ledD,LOW);
+    delay(msDelay);
+  }
+  
+  else
+  {  
+     digitalWrite(ledD,HIGH);
+    delay(msDelay);
+    digitalWrite(ledD,LOW);
+    delay(msDelay);
+      digitalWrite(ledC,HIGH);
+    delay(msDelay);
+    digitalWrite(ledC,LOW);
+    delay(msDelay);
+    digitalWrite(ledB,HIGH);
+    delay(msDelay);
+    digitalWrite(ledB,LOW);
+    delay(msDelay);
+    digitalWrite(ledA,HIGH);
+    delay(msDelay);
+    digitalWrite(ledA,LOW);
+    delay(msDelay);
+  }
+  
+   if(digitalRead(btnB) == 0 ) //0 = pressed
+  {
+    msDelay = littleDelay(); //set delay time to stort
+
+  }
+  else
+  {
+    msDelay = bigDelay(); // set dealy time to long
+    
+  }
+  
+
+}
+int bigDelay()
+{
+  return random(1, 1000);
+}
+
+int littleDelay()
+{
+  return random(1, 150);
+}
