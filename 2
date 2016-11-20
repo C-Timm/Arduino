@@ -6,41 +6,36 @@
 char btn = 7, led = 10;
 int wait = 10;
 int count = 0;
-int lcounter =0;
 bool t = true;
 
-LiquidCrystal_I2C lcd(0x20, 20, 2);
+LiquidCrystal_I2C lcd( 0x20, 20, 2);
 
-void setup() {
-    lcd.init();
+void setup()
+{
+   lcd.begin();
+   lcd.backlight();
     pinMode(led,OUTPUT);
     pinMode(btn,INPUT);
     lcd.print("Count:");
-   
 }
 
-void loop() {
+void loop() 
+{
  
- while( digitalRead(btn)==0 )//if btn is pressed 0= pressed
+ while( digitalRead(btn) == 0 && t == true)//if btn is pressed 0= pressed
   {
-    if (t ==0)
-    {
     count++;
     lcd.setCursor(0,1);
     lcd.print(count);
     digitalWrite(led,HIGH);
     delay(500);
-    t++;
-    }
-    else{
-      break;
-    }
+    t = false;
+   
   }
 
   digitalWrite(led,LOW);
   delay(wait);
-  lcounter++;
+
+  t = true;
 
 }
-Serial.begin(2400);
-  Serial.println("sup dude");
