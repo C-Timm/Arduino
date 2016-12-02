@@ -18,7 +18,9 @@ const unsigned trig =2, echo=3,   //trigger and echo ping for rang finder
          char* readyto = "Ready to ARM";
          char* armed = "ARMED";
          char* last;
- void power();
+
+void power();
+
 void setup()
   {
     lcd.init();
@@ -35,7 +37,7 @@ void setup()
 void loop()
   {
     power();
-    while(
+
   
   }
   
