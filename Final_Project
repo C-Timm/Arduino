@@ -11,7 +11,7 @@ LiquidCrystal_I2C lcd(0x20,16,2);
 NewPing sonar(2,3,200);
 
 const unsigned trig =2, echo=3,   //trigger and echo ping for rang finder
-                    Pbtn =8, led =10,  //, //Pbtn is the power button and led well... its the led
+                    Pbtn =8,led =10,  //, //Pbtn is the power button and led well... its the led
                     re =12;            //pin for the relay;
          uint8_t state= HIGH, reading , prev = LOW; 
          long t =0, debounce =10;
@@ -19,19 +19,20 @@ const unsigned trig =2, echo=3,   //trigger and echo ping for rang finder
          char armed[] = "ARMED";
          char* last;
          
-        float dist  =0;
-        char startDis = 35, endDis = 15;
-        long sTime, elapse;
+        float dist  = 0.0;
+        float startDis = 35.0, endDis = 15.0;
+        float  sTime, elapse;
 
-float time = millis();
+        
+int clearLcd();
 void power();
 
 void setup()
   {
   
-    lcd.init();
+    //lcd.init();
     sonar.ping();
-    delay(500);
+    delay(50);
     pinMode(trig,OUTPUT);
     pinMode(echo,INPUT);
     pinMode(Pbtn, INPUT);
@@ -41,40 +42,39 @@ void setup()
   }
 
 void loop()
-  {
+{
+    delay(50);
     while(sonar.ping_in() <= startDis )
    {
-    
       sTime = millis();
-      delay(500);
-      lcd.clear();
+      delay(50);
+      lcd.print("dist:");
       lcd.print(sonar.ping_in());
-   /*   if(sonar.ping_in() <= endDis)
-      {
-      elapse = millis() - sTime;
-      lcd.clear();
-      lcd.print(elapse);
-      break;
-      }
-      *
-      delay(500); */
+      
+        if(sonar.ping_in() <= endDis)
+           {
+              elapse = millis() - sTime;
+              lcd.clear();
+              lcd.print(elapse);
+              digitalWrite(re, LOW);
+              break;
+           }
    } 
-   if (!digitalRead(Pbtn))
-   {
-     sTime=0;
-     elapse =0;
-     lcd.clear();
-   }
+  clearLcd();
+/*
+ *  add toggle button
+ * distance trraveled/elapse time 
+ *
+ */
   
-  
-  }
-  
+}
 
-
-
-
+ 
+ /*
+  * Needs to commentted
+  */
 void power()
-   {
+{
      
    reading = digitalRead(Pbtn);
    if(reading == HIGH && prev == LOW && millis()- t > debounce )
@@ -86,6 +86,7 @@ void power()
        
        t = millis();
    }
+   
    digitalWrite(re, state);
    digitalWrite(led, state);
    if(state== HIGH && last != armed)
@@ -102,5 +103,19 @@ void power()
    }
    prev = reading;
 
-     
+}
+
+
+
+
+int clearLcd()
+{
+  while (!digitalRead(Pbtn))
+   {
+     sTime=0;
+     elapse =0;
+     lcd.clear();
    }
+   return 0;
+}
+
