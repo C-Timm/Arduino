@@ -6,6 +6,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
+
 LiquidCrystal_I2C lcd(0x20,16,2);
 NewPing sonar(2,3,200);
 
@@ -14,10 +15,15 @@ const unsigned trig =2, echo=3,   //trigger and echo ping for rang finder
                     re =12;            //pin for the relay;
          int state= HIGH, reading, prev = LOW; 
          long t =0, debounce =10;
+         char* readyto = "Ready to ARM";
+         char* armed = "ARMED";
+         char* last;
+ void power();
 void setup()
   {
     lcd.init();
     sonar.ping();
+    delay(500);
     pinMode(trig,OUTPUT);
     pinMode(echo,INPUT);
     pinMode(Pbtn, INPUT);
@@ -28,8 +34,18 @@ void setup()
 
 void loop()
   {
-    
+    power();
+    while(
   
+  }
+  
+
+
+
+
+void power()
+   {
+     
    reading = digitalRead(Pbtn);
    if(reading == HIGH && prev == LOW && millis()- t > debounce )
    {
@@ -42,7 +58,19 @@ void loop()
    }
    digitalWrite(re, state);
    digitalWrite(led, state);
-   while(state == HIGH){lcd.clear();  lcd.print("ARMED"); break;}
-   
+   if(state== HIGH && last != armed)
+   {
+      lcd.clear();
+      lcd.print(armed);
+      last = armed;
+   }
+   if(state== LOW && last != readyto)
+   {
+     lcd.clear();
+     lcd.print(readyto);
+     last = readyto;
+   }
    prev = reading;
-  }
+
+     
+   }
