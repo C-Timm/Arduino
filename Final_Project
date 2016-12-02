@@ -11,18 +11,24 @@ LiquidCrystal_I2C lcd(0x20,16,2);
 NewPing sonar(2,3,200);
 
 const unsigned trig =2, echo=3,   //trigger and echo ping for rang finder
-                    Pbtn =8, led =10, //Pbtn is the power button and led well... its the led
+                    Pbtn =8, led =10,  //, //Pbtn is the power button and led well... its the led
                     re =12;            //pin for the relay;
-         int state= HIGH, reading, prev = LOW; 
+         uint8_t state= HIGH, reading , prev = LOW; 
          long t =0, debounce =10;
-         char* readyto = "Ready to ARM";
-         char* armed = "ARMED";
+         char readyto[] = "Ready to ARM";
+         char armed[] = "ARMED";
          char* last;
+         
+        float dist  =0;
+        char startDis = 35, endDis = 15;
+        long sTime, elapse;
 
+float time = millis();
 void power();
 
 void setup()
   {
+  
     lcd.init();
     sonar.ping();
     delay(500);
@@ -31,13 +37,35 @@ void setup()
     pinMode(Pbtn, INPUT);
     pinMode(led,OUTPUT);
     pinMode(re,OUTPUT);
-    lcd.print("Ready to Arm");
+
   }
 
 void loop()
   {
-    power();
-
+    while(sonar.ping_in() <= startDis )
+   {
+    
+      sTime = millis();
+      delay(500);
+      lcd.clear();
+      lcd.print(sonar.ping_in());
+   /*   if(sonar.ping_in() <= endDis)
+      {
+      elapse = millis() - sTime;
+      lcd.clear();
+      lcd.print(elapse);
+      break;
+      }
+      *
+      delay(500); */
+   } 
+   if (!digitalRead(Pbtn))
+   {
+     sTime=0;
+     elapse =0;
+     lcd.clear();
+   }
+  
   
   }
   
