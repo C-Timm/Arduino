@@ -8,29 +8,44 @@
 
 
 LiquidCrystal_I2C lcd(0x20,16,2);
-NewPing sonar(2,3,200);
+NewPing sonar(12,13,200);
 
-const unsigned trig =2, echo=3,   //trigger and echo ping for rang finder
-                    Pbtn =8,led =10,  //, //Pbtn is the power button and led well... its the led
-                    re =12;            //pin for the relay;
-         uint8_t state= HIGH, reading , prev = LOW; 
+const unsigned trig = 12, echo = 13,   //trigger and echo ping for rang finder
+                    Pbtn =8,led =10,  //Pbtn is the power button and led well... its the led
+                    re =9, Cbtn = 7, btn = 5;            //pin for the relay;
+         
+         int state= HIGH, reading , prev = LOW; 
+         int state2 = HIGH, reading2 , prev2 = LOW; 
+       
          long t =0, debounce =10;
+         long t2 =0, debounce2 =10;
+         
          char readyto[] = "Ready to ARM";
          char armed[] = "ARMED";
          char* last;
+         char US[] = "inches/ second";
+         char RestoftheWorld[] = "meters/second";
+         char* lastCalc;
          
         float dist  = 0.0;
         float startDis = 35.0, endDis = 15.0;
         float  sTime, elapse;
-
         
+        
+        float inches = 39.37007874;
+        
+   bool why ;     
+
+
+int distCalc();       
 int clearLcd();
-void power();
+bool timer();
+bool power();
 
 void setup()
   {
   
-    //lcd.init();
+    lcd.init();
     sonar.ping();
     delay(50);
     pinMode(trig,OUTPUT);
@@ -38,44 +53,73 @@ void setup()
     pinMode(Pbtn, INPUT);
     pinMode(led,OUTPUT);
     pinMode(re,OUTPUT);
-
+     
   }
 
 void loop()
 {
-    delay(50);
-    while(sonar.ping_in() <= startDis )
+ 
+  while( power() == true)
+  {
+
+    if (timer() == true)
+    {
+        while(digitalRead(Cbtn) == 0)
+        {
+          distCalc();
+        }
+        
+      break;
+    }
+    
+  }
+}
+
+int distCalc()
+{
+     
+   reading2 = digitalRead(Cbtn);
+   if(reading2 == HIGH && prev2 == LOW && millis()- t2 > debounce2 )
    {
-      sTime = millis();
-      delay(50);
-      lcd.print("dist:");
-      lcd.print(sonar.ping_in());
-      
-        if(sonar.ping_in() <= endDis)
-           {
-              elapse = millis() - sTime;
-              lcd.clear();
-              lcd.print(elapse);
-              digitalWrite(re, LOW);
-              break;
-           }
-   } 
-  clearLcd();
-/*
- *  add toggle button
- * distance trraveled/elapse time 
- *
- */
-  
+     if(state2 == HIGH)
+       state2 = LOW;
+     else
+       state2 = HIGH;
+       
+       t2 = millis();
+   }
+   
+    
+if(state2 == HIGH && lastCalc != US)
+   {
+      lcd.clear();
+      lcd.print(inches/elapse);
+      lcd.setCursor(0,1);
+      lcd.print(US);
+      lastCalc = US;
+   }
+   if(state2 == LOW && lastCalc != RestoftheWorld)
+   {
+     lcd.clear();
+     lcd.print(1/elapse);
+     lcd.setCursor(0,1);
+     lcd.print(RestoftheWorld);
+     lastCalc = RestoftheWorld;
+   }
+   prev2 = reading2;
+    if(digitalRead(btn)==1)
+  {
+    clearLcd();
+    return 0;
+  }
 }
 
  
  /*
   * Needs to commentted
   */
-void power()
+bool power()
 {
-     
    reading = digitalRead(Pbtn);
    if(reading == HIGH && prev == LOW && millis()- t > debounce )
    {
@@ -89,33 +133,67 @@ void power()
    
    digitalWrite(re, state);
    digitalWrite(led, state);
-   if(state== HIGH && last != armed)
+   
+   if(state == HIGH && last != armed)
    {
       lcd.clear();
       lcd.print(armed);
       last = armed;
+      why = true;
+
    }
-   if(state== LOW && last != readyto)
+   if(state == LOW && last != readyto)
    {
      lcd.clear();
      lcd.print(readyto);
      last = readyto;
+    why = false;
    }
    prev = reading;
-
+ return why;  
 }
 
 
+bool timer()
+{
+  delay(50);
+    while(sonar.ping_in() <= startDis )
+   {
+      sTime = millis();
+      delay(50);
+     lcd.setCursor(0,1);
+      lcd.print(sonar.ping_in());
+      
+        if(sonar.ping_in() == endDis)
+           {
+              elapse = millis() - sTime;
+             /* lcd.clear();
+              lcd.print("It took");
+              lcd.setCursor(0,1);
+              lcd.print(elapse);
+              */
+
+              digitalWrite(re, LOW);
+              digitalWrite(led, LOW);
+              break;
+             
+           }
+           delay(50);
+   }  
+   
+   if(elapse > 0.5 )
+   {
+       return true;
+   }
+}
 
 
 int clearLcd()
 {
-  while (!digitalRead(Pbtn))
-   {
+  
      sTime=0;
      elapse =0;
      lcd.clear();
-   }
+   
    return 0;
 }
-
