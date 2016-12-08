@@ -33,7 +33,7 @@ NewPing sonar(12,13,200);
         float  sTime=0.0, elapse = 0.0 ;
         
         
-        float inches = 39.37007874, meteric = 1 ;
+        float inches = 20.0, meteric = 0.508,d ;
       
       bool i;  
    bool why ;     
