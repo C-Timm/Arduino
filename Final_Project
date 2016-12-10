@@ -3,11 +3,11 @@
     
     This program controls the power to a drill through a relay, 
     the drill is used to power a gear box that is lifting a mass.
-    A range finder is used to calcuates the velocty of a mass 
+    A range finder is used to calcuates the velocty of the mass 
     that is moved 1 meter the velocity can be displayed in
     meters/seconds and inches/seconds switchable by a button.
     
-    Pins:
+    Pin assignments:
       12 - TRIGER: range finder
       13 - ECHO: range finder
       10 - LED: indicates power is on or off
@@ -18,7 +18,6 @@
       
       
 */
-typedef float ufloat16_t;
 
 #include <NewPing.h> 
 #include <LiquidCrystal_I2C.h>
@@ -37,20 +36,19 @@ NewPing sonar(12,13,200);  //library for LCD
 
       //----------------------Variables----------------------\\
          
-         //--pin assignments ------------------------->              // uint8_t is a type of unsigned 
-            uint8_t     trig = 12, echo = 13,                        // integer with a length 8 bits 
-                        Pbtn = 8,  Cbtn = 7,
-                        led = 10,  re = 9, 
-                        timerLight = 6,
+         //--pin assignments ----------------------------------->// uint8_t is a type of unsigned 
+          uint8_t     trig = 12, echo = 13,                      // integer with a length 8 bits 
+                      Pbtn = 8,  Cbtn = 7,
+                      led = 10,  re = 9, 
+                      timerLight = 6,
                       
           //--varibles for toggle switch   
-                        state= HIGH, reading,
-                        prev = LOW,  count,
-                        del = 50,    t, 
-                        debounce = 10;
+                        state= HIGH, prev = LOW, 
+                        del = 50,    debounce = 10,
+                        reading,     count,
+                        t;
           
-  
-         //--Phrases to be printed
+         //--Phrases 
            char US[] = "inches/seconds  ";
            char RestoftheWorld[] = "meters/seconds  ";
            char readyto[] = "Ready to ARM";
@@ -59,13 +57,14 @@ NewPing sonar(12,13,200);  //library for LCD
 
            
         //--distances, times, units
-          ufloat16_t   startDis = 35.0,  endDis = 15.0, 
-                       sTime,            elapse,
-                       inches = 20.0,    meteric = 0.508,
-                       dist ;
+          float  startDis = 35.0,  endDis = 15.0, 
+                 inches = 20.0,    meteric = 0.508,
+                 sTime,            elapse,
+                 dist ;
+                 
 
                 
-        //--testing contions ... more or less
+        //--testing contions..... more or less
           bool MERICA, go;  
 
 void setup()
@@ -105,8 +104,7 @@ void loop()
          if( MERICA == false)
            Display(RestoftheWorld, meteric);
            MERICA = true;
-  }
-     
+  }   
 }
    
  /*
@@ -115,13 +113,13 @@ void loop()
   * The conditions that the toggle uses is the last message 
   * displayed to the LCD screen and the current state of the button.  
   * 
-  *  if the state of the button is HIGH  (i.e. the button is not pressed) 
+  *  If the state of the button is HIGH  (i.e. the button is not pressed) 
   *  and the message is not the same as the pervious one:
   *      LCD displays "Ready to Arm"  
   *      power to the relay stays off 
   *      LED stays off 
   * 
-  * if the stat is LOW and the message is not the same as the pervious one:   
+  * If the stat is LOW and the message is not the same as the pervious one:   
   *     LCD displays "Armed"
   *     power to the relay is turned on 
   *     LED is turned on 
@@ -182,7 +180,6 @@ bool power()
  * alot easier  and I left it in the final program because 
  * it improved the overall preformance.
  * 
- * 
  * While checking the distance the timer will be started 
  * and stopped with in ±0.5 of the starting and stopping distance.
  * Becasue it is hard to hit the exact starting and stopping
@@ -211,7 +208,7 @@ bool timer()
                  
                     digitalWrite(re, state);
                     digitalWrite(led, state);
-                    digitalWrite(timerLight,HIGH);
+                    digitalWrite(timerLight,!state);
                  
                     return false;
                  }
@@ -227,10 +224,10 @@ bool timer()
  * it gets passed the phrase that is to be 
  * displayed and the units that go with the phrase
  */
-void Display(char* phrase, ufloat16_t unit)
+void Display(char* phrase, float unit)
 {
      lcd.clear();
-     lcd.print(unit/(elapse/1000),4);  // lcd.print(vaule,number desired  of deciaml places)
+     lcd.print(unit/(elapse/1000),4);  // lcd.print(vaule,number of desired printed deciaml places)
      lcd.setCursor(0,1);
      lcd.print(phrase);
 }
