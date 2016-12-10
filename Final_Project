@@ -1,60 +1,82 @@
 /*
-    Final Project
+    Final Project     Group B1 : Christopher Timm     12/9/2016
+    
+    This program controls the power to a drill through a relay, 
+    the drill is used to power a gear box that is lifting a mass.
+    A range finder is used to calcuates the velocty of a mass 
+    that is moved 1 meter the velocity can be displayed in
+    meters/seconds and inches/seconds switchable by a button.
+    
+    Pins:
+      12 - TRIGER: range finder
+      13 - ECHO: range finder
+      10 - LED: indicates power is on or off
+      9  - RELAY 
+      8  - BUTTON : on/off power 
+      7  - BUTTON: for displaying calcuations
+      6  - LED :that flashes when the timer starts //not needed but helpful for testing and other things
+      
+      
 */
+typedef float ufloat16_t;
 
 #include <NewPing.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
 
-LiquidCrystal_I2C lcd(0x20,16,2);
-NewPing sonar(12,13,200);
+LiquidCrystal_I2C lcd(0x20,16,2);  //library for LCD
+NewPing sonar(12,13,200);  //library for LCD
 
 
-          //pin varibles
-  const unsigned      trig = 12, echo = 13,  
-                      Pbtn =8, Cbtn=7,
-                      led =10, re =9 ;
+//---------Functions---------\\
+  void Display(char*,float);
+  char distCalc();       
+  bool timer();
+  bool power();
+
+      //----------------------Variables----------------------\\
+         
+         //--pin assignments ------------------------->  // uint8_t is a type of unsigned 
+            uint8_t     trig = 12, echo = 13,            // integer with a length 8 bits 
+                        Pbtn = 8,  Cbtn = 7,
+                        led = 10,  re = 9, 
+                        timerLight = 6,
                       
-          //varibles for toggle switch
-  uint8_t  state= HIGH, reading , prev = LOW; 
-  uint8_t count;
-  long t =0, debounce =10;
-         
-     
-         char readyto[] = "Ready to ARM";
-         char armed[] = "ARMED";
-         char* last;
-         char US[] = "inches/ second";
-         char RestoftheWorld[] = "meters/second";
-         
-        float dist  = 0.0;
-        float startDis = 35.0, endDis = 15.0;
-        float  sTime=0.0, elapse = 0.0 ;
-        
-        
-        float inches = 20.0, meteric = 0.508,d ;
-      
-      bool i;  
-   bool why ;     
-
-void Display(char*,float);
-char distCalc();       
-bool timer();
-bool power();
+          //--varibles for toggle switch   
+                        state= HIGH, reading,
+                        prev = LOW,  count,
+                        del = 50,    t, 
+                        debounce = 10;
+          
+  
+         //--Phrases to be printed
+           char US[] = "inches/seconds  ";
+           char RestoftheWorld[] = "meters/seconds  ";
+           char readyto[] = "Ready to ARM";
+           char armed[] = "ARMED";
+           char* last;
+           
+        //--distances, times, units
+          ufloat16_t   startDis = 35.0,  endDis = 15.0, 
+                       sTime,            elapse,
+                       inches = 20.0,    meteric = 0.508,
+                       dist ;
+                
+        //--testing contions ... more or less
+          bool         i , why;  
 
 void setup()
   {
-  
     lcd.init();
     sonar.ping();
-    delay(50);
+    delay(del);
     pinMode(trig,OUTPUT);
     pinMode(echo,INPUT);
     pinMode(Pbtn, INPUT);
     pinMode(led,OUTPUT);
     pinMode(re,OUTPUT);
-     
+    pinMode(timerLight,OUTPUT);
   }
 
 void loop()
@@ -74,23 +96,23 @@ void loop()
   {
      while(!digitalRead(Cbtn))
      {
-        if ( i== true)
+        if (i == true)
             Display(US,inches);
             i = false;
           
      }  
-     if(i== false)
+         if(i== false)
      {
            Display(RestoftheWorld, meteric);
            i = true;
      }
 
   }
-       
+     
 }
    
  /*
-  * Needs to commentted
+  * 
   */
 bool power()
 {
@@ -100,8 +122,8 @@ bool power()
    {
      if(state == HIGH && last != readyto)
      {
-       state = LOW;
-       lcd.clear();
+        state = LOW;
+        lcd.clear();
         lcd.print(readyto);
         last = readyto;
         why = false;
@@ -110,7 +132,6 @@ bool power()
      else
      {
         state = HIGH;
-        
         lcd.clear();
         lcd.print(armed);
         last = armed;
@@ -130,20 +151,20 @@ bool power()
 
 bool timer()
 {
- if(sonar.ping_in() == startDis)
+  dist= sonar.ping_in(); 
+ if(dist <= startDis + 0.5 && dist >=startDis - 0.5)
    {
       sTime = millis();
-       digitalWrite(re,LOW);
-      digitalWrite(led,LOW);
-      delay(100);
-      digitalWrite(re, HIGH);
-      digitalWrite(led, HIGH);
+       digitalWrite(timerLight,HIGH);
+      delay(del*2);
+      digitalWrite(timerLight, LOW);
+   
              
-      delay(50);
-      while(sTime >0)
+      delay(del);
+      while(sTime > 0)
       {
-      d = sonar.ping_in(); 
-         if (d == endDis)
+      dist = sonar.ping_in(); 
+         if (dist <= endDis+0.5 && dist >=endDis-0.5)
            {
               elapse = millis() - sTime;
                
@@ -151,19 +172,20 @@ bool timer()
              
               digitalWrite(re, state);
               digitalWrite(led, state);
+              digitalWrite(timerLight,HIGH);
              
               return false;
            }
-           delay(50);
+           delay(del);
       }
    } 
- delay(50);
+ delay(del);
  
 }
 
 void Display(char* phrase,float unit)
 {
-  lcd.clear();
+     lcd.clear();
      lcd.print(unit/(elapse/1000),4);
       lcd.setCursor(0,1);
      lcd.print(phrase);
