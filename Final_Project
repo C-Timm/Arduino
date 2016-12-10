@@ -37,8 +37,8 @@ NewPing sonar(12,13,200);  //library for LCD
 
       //----------------------Variables----------------------\\
          
-         //--pin assignments ------------------------->  // uint8_t is a type of unsigned 
-            uint8_t     trig = 12, echo = 13,            // integer with a length 8 bits 
+         //--pin assignments ------------------------->              // uint8_t is a type of unsigned 
+            uint8_t     trig = 12, echo = 13,                        // integer with a length 8 bits 
                         Pbtn = 8,  Cbtn = 7,
                         led = 10,  re = 9, 
                         timerLight = 6,
@@ -56,15 +56,17 @@ NewPing sonar(12,13,200);  //library for LCD
            char readyto[] = "Ready to ARM";
            char armed[] = "ARMED";
            char* last;
+
            
         //--distances, times, units
           ufloat16_t   startDis = 35.0,  endDis = 15.0, 
                        sTime,            elapse,
                        inches = 20.0,    meteric = 0.508,
                        dist ;
+
                 
         //--testing contions ... more or less
-          bool         i , why;  
+          bool MERICA, go;  
 
 void setup()
   {
@@ -84,109 +86,151 @@ void loop()
  
   if (power() == true)
   {
-
-   if (timer() == false)
-    {
-      lcd.clear();
-        count++;
-    }
+      if (timer() == false)
+      {
+          lcd.clear();
+            count++;
+      }
   }
   
   while(count == 1)
   {
      while(!digitalRead(Cbtn))
      {
-        if (i == true)
+        if ( MERICA == true)
             Display(US,inches);
-            i = false;
+            MERICA = false;
           
      }  
-         if(i== false)
-     {
+         if( MERICA == false)
            Display(RestoftheWorld, meteric);
-           i = true;
-     }
-
+           MERICA = true;
   }
      
 }
    
  /*
+  * This function is a toggle function for the button 
+  * the turns the power on (Pbtn) that returns the boolean "power". 
+  * The conditions that the toggle uses is the last message 
+  * displayed to the LCD screen and the current state of the button.  
   * 
+  *  if the state of the button is HIGH  (i.e. the button is not pressed) 
+  *  and the message is not the same as the pervious one:
+  *      LCD displays "Ready to Arm"  
+  *      power to the relay stays off 
+  *      LED stays off 
+  * 
+  * if the stat is LOW and the message is not the same as the pervious one:   
+  *     LCD displays "Armed"
+  *     power to the relay is turned on 
+  *     LED is turned on 
+  *     
+  *  
+  *  If the function returns true that means the power is on,
+  *  the LED is illuminated and the program can move onto the next step
+  *  
+  *  If the function returns false that means the power is off         
   */
 bool power()
 {
             
-   reading = digitalRead(Pbtn);
-   if(reading == HIGH && prev == LOW && millis()- t > debounce )
-   {
-     if(state == HIGH && last != readyto)
-     {
-        state = LOW;
-        lcd.clear();
-        lcd.print(readyto);
-        last = readyto;
-        why = false;
-        
-     }
-     else
-     {
-        state = HIGH;
-        lcd.clear();
-        lcd.print(armed);
-        last = armed;
-        why = true;
-     }
-       
-       t = millis();
-   }
+  reading = digitalRead(Pbtn);
+  
+   if(reading == HIGH && prev == LOW && millis()- t > debounce ) // -----> //debounce is used so the output doesnt flicker
+    {                                                                      //if the state just went from HIGh to LOW and the 
+       if(state == HIGH && last != readyto)                                //program has waitted long enough to ignore any
+        {                                                                  //delay or noise on the curcuit then toggle the
+            state = LOW;                                                   //message and remeember the time it took (t).
+            lcd.clear();                                                     
+            lcd.print(readyto);
+            last = readyto;
+            go = false;
+        }
+       else
+        {
+            state = HIGH;
+            lcd.clear();
+            lcd.print(armed);
+            last = armed;
+            go = true;
+        }
+         
+        t = millis();
+    }
    
    digitalWrite(re, state);
    digitalWrite(led, state);
 
    prev = reading;
- return why;  
+   
+ return go;  
 }
 
+/*
+ * This function is for the timer 
+ * 
+ * The basic idea is that when the mass is 35 inches from the top 
+ * the timer is started, then continouly check the range finder 
+ * to see how far the mass is. When the mass reaches
+ * 15 inches away from the top the timer is stopped the function 
+ * returns false.
+ * 
+ * I also added an LED "timerLight" to this function that blinks 
+ * once when the timer starts and is left illuminated when the
+ * timer is stopped the reason I did this is it made testing 
+ * alot easier  and I left it in the final program because 
+ * it improved the overall preformance.
+ * 
+ * 
+ * While checking the distance the timer will be started 
+ * and stopped with in ±0.5 of the starting and stopping distance.
+ * Becasue it is hard to hit the exact starting and stopping
+ * distances.The time the mass to is stored in elapsed
+ */
 
 bool timer()
 {
-  dist= sonar.ping_in(); 
- if(dist <= startDis + 0.5 && dist >=startDis - 0.5)
-   {
+  dist = sonar.ping_in(); 
+ 
+  if(dist <= startDis + 0.5 && dist >= startDis - 0.5)
+  {
       sTime = millis();
-       digitalWrite(timerLight,HIGH);
+      digitalWrite(timerLight,HIGH);
       delay(del*2);
       digitalWrite(timerLight, LOW);
    
-             
-      delay(del);
-      while(sTime > 0)
-      {
-      dist = sonar.ping_in(); 
-         if (dist <= endDis+0.5 && dist >=endDis-0.5)
-           {
-              elapse = millis() - sTime;
-               
-              state = LOW; 
-             
-              digitalWrite(re, state);
-              digitalWrite(led, state);
-              digitalWrite(timerLight,HIGH);
-             
-              return false;
-           }
+       while(sTime > 0)
+        {
+          dist = sonar.ping_in(); 
+         
+            if (dist <= endDis + 0.5 && dist >= endDis - 0.5)
+                {
+                    elapse = millis() - sTime;
+                    state = LOW; 
+                 
+                    digitalWrite(re, state);
+                    digitalWrite(led, state);
+                    digitalWrite(timerLight,HIGH);
+                 
+                    return false;
+                 }
            delay(del);
-      }
-   } 
+        }
+  } 
  delay(del);
  
 }
 
-void Display(char* phrase,float unit)
+/*
+ * Function that dislays the calculations 
+ * it gets passed the phrase that is to be 
+ * displayed and the units that go with the phrase
+ */
+void Display(char* phrase, ufloat16_t unit)
 {
      lcd.clear();
-     lcd.print(unit/(elapse/1000),4);
-      lcd.setCursor(0,1);
+     lcd.print(unit/(elapse/1000),4);  // lcd.print(vaule,number desired  of deciaml places)
+     lcd.setCursor(0,1);
      lcd.print(phrase);
 }
