@@ -1,0 +1,39 @@
+#include <LiquidCrystal_I2C.h>
+
+#include <Wire.h>
+
+ int leds[] = {8,9,10,11};
+ int btn = 5, count = 0;
+ bool state;
+ 
+ 
+void setup() {
+  for(int i = 0; i <= 3; i++)
+  {
+    pinMode(leds[i],OUTPUT);
+  }
+  pinMode(btn, INPUT);
+  Serial.begin(9600); 
+  
+}
+
+void loop() {
+  state = digitalRead(btn);
+  if (state == false)   //pressed
+  {
+    digitalWrite(leds[0],LOW);
+    digitalWrite(leds[2],LOW);
+    
+    digitalWrite(leds[1],HIGH);
+    digitalWrite(leds[3],HIGH);
+    
+    
+  }else{
+     digitalWrite(leds[1],LOW);
+    digitalWrite(leds[3],LOW);
+    
+     digitalWrite(leds[0],HIGH);
+     digitalWrite(leds[2],HIGH);
+  }
+     
+}
