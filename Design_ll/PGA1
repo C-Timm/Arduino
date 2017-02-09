@@ -8,7 +8,7 @@
   button presses is counted and 
   displayed to the LCD screen
   
-  Button: Pin 5
+  Button: Pin 4
   Leds: Pins 8,9,10,11
   bool: is used to check if the button is being held down
   */
@@ -19,7 +19,7 @@
 LiquidCrystal_I2C lcd(0x20, 20,2);
 
  int leds[] = {8,9,10,11};      //LEDS
- int btn = 5, count = 0;
+ int btn = 4, count = 0;
  bool check;
  
  
