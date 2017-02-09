@@ -1,0 +1,77 @@
+/* 
+C.Timm  11/20/2016  Timm_Arduino_2  
+
+  Counts number of button presses and 
+  displays the count on the lcd screen. 
+  Also blinks a led for a hlaf second 
+  when the button is pressed.
+  
+  I also added a second button that 
+  resests the count to zero so you
+  dont have to unplug the board to
+  rest the count. 
+  
+  Buttons: pins 7 & 8
+  LED: pin 10
+  bool: used to see if button is being held down
+
+*/
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
+char btn = 7, resetbtn = 8, led = 10;
+int wait = 500;
+int count;
+bool holdCheck;  
+LiquidCrystal_I2C lcd( 0x20, 20, 2);
+
+void reset(); // reset function
+
+void setup()
+{
+    pinMode(led,OUTPUT);
+    pinMode(resetbtn,INPUT);
+    pinMode(btn,INPUT);
+    lcd.init();
+    lcd.print("Count:");
+  
+}
+
+void loop() 
+{  
+ if (!digitalRead(resetbtn)) // Checks to see if the reset button is pressed
+ {
+  reset();  
+ }
+ 
+ while(!digitalRead(btn))//if btn is pressed 
+  {
+    if(holdCheck == true) //-----> // testing condition so that if the button 
+    {                              // is held down it wont keep counting 
+    count++;
+    lcd.setCursor(0,1);
+    lcd.print(count);
+    digitalWrite(led,HIGH);
+    delay(wait);
+    holdCheck = false;
+    }
+  }
+  digitalWrite(led,LOW);
+  delay(wait);     //------> // if this is somthing much smaller
+  holdCheck = true;          //(like 10) it takes away alot of   
+}                            // the delay when the button is pressed
+                             // which makes every function smoother     
+
+/*
+  Resets the count to zero
+  and reprints "Count:" and
+  the count vaule
+*/
+void reset()
+{
+     count = 0;
+     lcd.clear();
+     lcd.print("Count:");
+     lcd.setCursor(0,1);
+     lcd.print(count);
+}
