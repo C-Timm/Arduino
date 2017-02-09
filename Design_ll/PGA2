@@ -1,0 +1,68 @@
+/*
+ * C. Timm  2/6/2017  PGA2_Timm
+ * Blinks leds Forward i.e. leds 9 - 12 using a for 
+ * loop in side a method called ledFor().
+ * If the button is pressed the the method ledBac() 
+ * gets called and blinks the led backwards i.e. 12-9
+ * 
+ * Button: Pin 
+ * Led: Pins 8,10,11,12
+ */
+
+int timer = 150;
+char btn = 4;
+
+void ledFor();
+void ledBac();
+
+void setup() {
+  
+  for(int led = 9; led <= 12; led++)
+  {
+    pinMode(led,OUTPUT);
+  }
+  pinMode(btn, INPUT);
+}
+
+void loop() {
+
+    ledFor();
+
+    while (digitalRead(btn) == 1) // 0 = pressed 
+    {
+      ledBac();
+    }
+    
+}
+
+/*
+ * Blinks LED's Forward so 
+ * in the order of 9, 10, 11, 12
+ */
+void ledFor()
+{
+  for(int led = 9; led <= 12; led++)
+  {
+    digitalWrite(led,HIGH);
+    delay(timer);
+    digitalWrite(led,LOW);
+  }
+}
+
+/*
+ * Blinks LED's Backwards so 
+ * in the order of 12 ,11 10, 9
+ */
+void ledBac()
+{
+  for(int led = 12; led >= 9; led--)
+  {
+    digitalWrite(led,HIGH);
+    delay(timer);
+    digitalWrite(led,LOW);
+  }
+}
+
+
+
+
