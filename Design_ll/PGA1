@@ -1,0 +1,59 @@
+
+  C.Timm  2/6/2017    Timm_Arduino_1
+  
+  Turns on LEDs 8 & 10
+  when the button is pressed LEDS 
+  8 & 10 turn off ans LED 9 & 11 
+  turn on. Also the number of 
+  button presses is counted and 
+  displayed to the LCD screen
+  
+  Button: Pin 5
+  Leds: Pins 8,9,10,11
+  bool: is used to check if the button is being held down
+  */
+
+
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+LiquidCrystal_I2C lcd(0x20, 20,2);
+
+ int leds[] = {8,9,10,11};      //LEDS
+ int btn = 5, count = 0;
+ bool check;
+ 
+ 
+void setup() {
+  for(int i = 0; i <= 3; i++)
+  {
+    pinMode(leds[i],OUTPUT);
+  }
+  pinMode(btn, INPUT);
+ lcd.init();
+  
+}
+
+void loop() {
+
+  while(digitalRead(btn) == 0)
+  {
+    digitalWrite(leds[0],LOW);  
+    digitalWrite(leds[2],LOW);
+    digitalWrite(leds[1],HIGH);
+    digitalWrite(leds[3],HIGH);
+      if (check == true)   //0 = pressed
+        {
+            lcd.clear();
+            count++;
+            lcd.print("count = ");
+            lcd.print(count);
+            check = false;
+        }
+  }
+     digitalWrite(leds[1],LOW);
+     digitalWrite(leds[3],LOW);
+     digitalWrite(leds[0],HIGH);
+     digitalWrite(leds[2],HIGH);
+     
+     check = true;
+}
