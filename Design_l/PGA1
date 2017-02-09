@@ -1,0 +1,101 @@
+/*
+C.Timm  11/2/2016 Blinking LED with button
+
+Changes blink LEDs with two buttons
+delays blink by a random value 
+returned from one of two random funtion generators.
+LCD screen displays the blink delay along with the 
+direction in which the lights are blinking  
+
+Button: Pin 7 & 8
+LED's: Pins 9 through 12
+
+
+*/
+ #include <LiquidCrystal_I2C.h>
+ #include <Wire.h>
+
+const char ledA = 9, ledB = 10, ledC = 11, ledD = 12; //led's
+const char btnA = 7, btnB = 8;  //buttoms
+
+double bigDelay(); //long delay number generator funtion
+double littleDelay(); //short delay number generator funtion
+
+double msDelay = bigDelay() ;// delay time for blink
+
+LiquidCrystal_I2C lcd(0x20, 20, 2); 
+
+void blinkLight(const char, double);
+void delVal(double);
+
+
+void setup() 
+{
+      pinMode(ledA, OUTPUT);
+      pinMode(ledB, OUTPUT);
+      pinMode(ledC, OUTPUT);
+      pinMode(ledD, OUTPUT);
+      pinMode(btnA,INPUT);
+      pinMode(btnB,INPUT);
+      lcd.init(); 
+}
+
+void loop() {
+  //If btnA is pressed
+ if(digitalRead(btnA) == 0 ) //0 = pressed
+ {
+   delVal(msDelay);
+   lcd.setCursor(0,1);
+   lcd.print("Direction -->");
+
+    blinkLight(ledA,msDelay);
+    blinkLight(ledB,msDelay);
+    blinkLight(ledC,msDelay);
+    blinkLight(ledD,msDelay);
+  }
+  else
+  {  
+    delVal(msDelay);
+    lcd.setCursor(0,1);
+    lcd.print("Direction <--");
+   
+     blinkLight(ledD,msDelay);
+     blinkLight(ledC,msDelay);
+     blinkLight(ledB,msDelay);
+     blinkLight(ledA,msDelay);
+  }
+  
+   if(digitalRead(btnB) == 0 ) //0 = pressed
+  {
+    msDelay = littleDelay(); //set delay time to stort
+    delVal(msDelay);
+  }
+  else
+  {
+    msDelay = bigDelay(); // set dealy time to long
+    delVal(msDelay);
+  }
+
+}
+double bigDelay()
+{
+  return random(101, 1000);
+}
+
+double littleDelay()
+{
+  return random(1, 100);
+}
+void blinkLight(char light, double del)
+{
+  digitalWrite(light,HIGH);
+  delay(del);
+  digitalWrite(light,LOW);
+  delay(del);
+}
+void delVal(double val)
+{
+   lcd.clear();
+   lcd.print(val/1000);
+   lcd.print(" seconds");
+}
