@@ -30,6 +30,8 @@ void setup() {
   }
   pinMode(btn, INPUT);
  lcd.init();
+ lcd.print("count = ");
+ lcd.print(count);
   
 }
 
