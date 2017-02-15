@@ -28,7 +28,8 @@ void setup() {
   {
     pinMode(leds[i],OUTPUT);
   }
-  pinMode(btn, INPUT);
+ 
+ pinMode(btn, INPUT);
  lcd.init();
  lcd.print("count = ");
  lcd.print(count);
@@ -43,7 +44,8 @@ void loop() {
     digitalWrite(leds[2],LOW);
     digitalWrite(leds[1],HIGH);
     digitalWrite(leds[3],HIGH);
-      if (check == true)   //0 = pressed
+     
+     if (check == true)   //0 = pressed
         {
             lcd.clear();
             count++;
