@@ -44,7 +44,8 @@ void loop() {
     digitalWrite(leds[2],LOW);
     digitalWrite(leds[1],HIGH);
     digitalWrite(leds[3],HIGH);
-     
+    
+    //Extra Credit
      if (check == true)   //0 = pressed
         {
             lcd.clear();
