@@ -3,7 +3,7 @@ C.Timm  11/20/2016  Timm_Arduino_2
 
   Counts number of button presses and 
   displays the count on the lcd screen. 
-  Also blinks a led for a hlaf second 
+  Also blinks a led for a half second 
   when the button is pressed.
   
   I also added a second button that 
