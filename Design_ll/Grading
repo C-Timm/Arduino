@@ -1,0 +1,47 @@
+
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+int buttonPin = 4; //declaring pin assignment for button
+int LED_A = 8; // declaring pin assignments for LEDs
+int LED_B = 9;
+int LED_C = 10;
+int LED_D = 11;
+LiquidCrystal_I2C lcd(0x20,16,2);
+int count = 0;
+
+
+void setup() {
+  // put your setup code here, to run once:
+    pinMode (LED_A, OUTPUT); //setting LEDs as outputs and the button as an input
+    pinMode (LED_B, OUTPUT);
+    pinMode (LED_C, OUTPUT);
+    pinMode (LED_D, OUTPUT);
+    pinMode (buttonPin, INPUT);
+    lcd.init();
+    lcd.print("Count: ");
+    lcd.print(count);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+   boolean Pressed = (digitalRead(buttonPin) == 0); //storing pressed value of button in Boolean only if the button is pressed
+   if(Pressed) //if button is pressed, do this code
+  {
+   digitalWrite(LED_A, LOW); //turn on LED B and D, turn off LED A and C
+   digitalWrite(LED_B, HIGH);
+   digitalWrite(LED_C, LOW);
+   digitalWrite(LED_D, HIGH);
+   delay(100); //delay by 100 ms
+   lcd.clear();
+    lcd.print("Count: ");
+    lcd.print(count++);
+  }
+  else //if button is not pressed, do this code
+  {
+   digitalWrite(LED_A, HIGH); //turn on LED A and C, turn off LED B and D
+   digitalWrite(LED_B, LOW);
+   digitalWrite(LED_C, HIGH);
+   digitalWrite(LED_D, LOW);
+   delay(100); //delay by 100 ms
+  }
+}
