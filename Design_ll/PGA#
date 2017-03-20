@@ -1,0 +1,66 @@
+/*
+ * C. Timm  3/20/2017  PGA3_Timm
+ */
+
+#include <avr/pgmspace.h>
+int timer = 100;
+char btn = 4;
+const uint8_t leds[] = {3,5,6,9,11,10};
+
+void setup() {
+
+  for(int led = 0; led <= sizeof(leds); led++)
+  {
+    pinMode(led,OUTPUT);
+  }
+ 
+}
+
+void loop() {
+
+    ledFor();
+    
+    ledBac();
+    
+  while (digitalRead(btn) == 1){}   // while the button is not pressed do nothing
+    
+    
+}
+
+/*
+ * Blinks LED's Forward so 
+ * in the order of 9, 10, 11, 12
+ */
+void ledFor()
+{
+  for(int led = 0; led <= sizeof(leds); led++)
+  
+   fade(led);
+  
+}
+
+/*
+ * Blinks LED's Backwards so 
+ * in the order of 12 ,11 10, 9
+ */
+void ledBac()
+{
+  for(int led = sizeof(leds); led >= 0; led--)
+  
+    fade(led);
+   
+  
+}
+
+void fade(int led)
+{
+  for(int i =0;i<=255; i+=4)
+    analogWrite(leds[led], i);
+    delay(10);
+
+    for(int j =255 ;j<=0; j-=4)
+    analogWrite(leds[led], j);
+    delay(10);
+    
+}
+
