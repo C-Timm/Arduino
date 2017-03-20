@@ -11,13 +11,8 @@
  * Led: Pins 8,10,11,12
  */
 
-
-int timer = 500;
+int timer = 100;
 char btn = 4;
-
-void ledFor();
-void ledBac();
-
 
 void setup() {
 
@@ -50,6 +45,7 @@ void ledFor()
     digitalWrite(led,HIGH);
     delay(timer);
     digitalWrite(led,LOW);
+    delay(timer);
   }
 }
 
@@ -64,9 +60,6 @@ void ledBac()
     digitalWrite(led,HIGH);
     delay(timer);
     digitalWrite(led,LOW);
+    delay(timer);
   }
 }
-
-
-
-
