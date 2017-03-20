@@ -1,10 +1,11 @@
 /*
  * C. Timm  3/20/2017  PGA3_Timm
+ only blink 11 once not twice,and fix define button press
  */
 
 #include <avr/pgmspace.h>
 uint8_t del = 10;
-char btn = 4;
+#define btn digitalRead(4)
 const uint8_t leds[] = {3,5,6,9,10,11};
 
 void setup() {
@@ -22,32 +23,35 @@ void loop() {
     
     ledBac();
     
-  while (digitalRead(btn) == 1); // while the button is not pressed do nothing
+  while (!btn)
+ {
+ }
+ // while the button is not pressed do nothing
     
     
 }
 
 /*
- * Blinks LED's Forward so 
- * in the order of 9, 10, 11, 12
+ * Blinks LED's Forward  
  */
 void ledFor()
 {
-  for(int led = 0; led <= sizeof(leds); led++)
-  
+  for(int led = 0; led <= 5; led++)
+  {
    fade(led);
+  }
   
 }
 
 /*
- * Blinks LED's Backwards so 
- * in the order of 12 ,11 10, 9
+ * Blinks LED's Backwards 
  */
 void ledBac()
 {
-  for(int led = sizeof(leds); led >= 0; led--)
-  
+  for(int led = 5; led >= 0; led--)
+  {
     fade(led);
+  }
    
   
 }
@@ -55,15 +59,17 @@ void ledBac()
 void fade(int led)
 {
   for(int i =0;i<=255; i+=4)
+  {
     analogWrite(leds[led], i);
     delay(del);
+  }
 
-    for(int j =255 ;j<=0; j-=4)
+    for(int j = 255 ;j >= 0; j-=4)
+    {
     analogWrite(leds[led], j);
     delay(del);
-    
+    }
 }
-
 
 
 
