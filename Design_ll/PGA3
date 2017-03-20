@@ -3,9 +3,9 @@
  */
 
 #include <avr/pgmspace.h>
-int timer = 100;
+uint8_t del = 10;
 char btn = 4;
-const uint8_t leds[] = {3,5,6,9,11,10};
+const uint8_t leds[] = {3,5,6,9,10,11};
 
 void setup() {
 
@@ -22,7 +22,7 @@ void loop() {
     
     ledBac();
     
-  while (digitalRead(btn) == 1){}   // while the button is not pressed do nothing
+  while (digitalRead(btn) == 1); // while the button is not pressed do nothing
     
     
 }
@@ -56,11 +56,13 @@ void fade(int led)
 {
   for(int i =0;i<=255; i+=4)
     analogWrite(leds[led], i);
-    delay(10);
+    delay(del);
 
     for(int j =255 ;j<=0; j-=4)
     analogWrite(leds[led], j);
-    delay(10);
+    delay(del);
     
 }
+
+
 
