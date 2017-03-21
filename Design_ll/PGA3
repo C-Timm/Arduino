@@ -1,75 +1,104 @@
 /*
  * C. Timm  3/20/2017  PGA3_Timm
- only blink 11 once not twice,and fix define button press
+ * Program that cyles through 6 leds in an array 
+ * it cycles up through the leds[] fading them on and off each time 
+ * than cyles through the leds[] backwards fading the leds on and off
+ * as it goes.
  */
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+LiquidCrystal_I2C lcd(0x20, 20,2);
 
-#include <avr/pgmspace.h>
-uint8_t del = 10;
+
+
 #define btn digitalRead(4)
+
 const uint8_t leds[] = {3,5,6,9,10,11};
 
-void setup() {
+int8_t amLeds = sizeof(leds)-1, del = 10, steps = 4 ;
 
-  for(int led = 0; led <= sizeof(leds); led++)
-  {
+
+void setup() {
+  
+  lcd.init();
+  lcd.print("Assignment 3");
+  
+  for(int led = 0; led <= amLeds; led++)
     pinMode(led,OUTPUT);
-  }
- 
-}
+    pinMode(4,INPUT);
+ }
 
 void loop() {
 
     ledFor();
-    
     ledBac();
     
-  while (!btn)
- {
- }
- // while the button is not pressed do nothing
-    
-    
+  while (btn); // while the button is not pressed do nothing
+   
 }
 
 /*
- * Blinks LED's Forward  
+ * Loops through leds[] in the forward direction 
+ * i.e. 3,5,6,9,10,11 and passes each led value 
+ * to the fade(int) function 
  */
 void ledFor()
 {
-  for(int led = 0; led <= 5; led++)
-  {
-   fade(led);
-  }
-  
+  for(int led = 0; led <= amLeds; led++)
+     fade(led);
 }
 
 /*
- * Blinks LED's Backwards 
+ * Loops through leds[] in the backwards direction 
+ * i.e. 10,9,6,5,3 and passes each led value 
+ * to the fade(int) function. Doesnt pass 11
+ * becaseu we dont want to fade the last led
+ * twice
  */
 void ledBac()
 {
-  for(int led = 5; led >= 0; led--)
-  {
-    fade(led);
-  }
-   
-  
+  for(int led = amLeds - 1; led >= 0; led--)   
+     fade(led);
 }
-
+/*
+ * Fades led from 0 to 255 first in steps of the
+ * varible "steps" which is defined above.
+ * Then fades led from 255 to 0 in using the 
+ * same value of "steps" than turns off led
+ * so gwet ride of the residuale 
+*/
 void fade(int led)
 {
-  for(int i =0;i<=255; i+=4)
-  {
-    analogWrite(leds[led], i);
-    delay(del);
-  }
-
-    for(int j = 255 ;j >= 0; j-=4)
-    {
-    analogWrite(leds[led], j);
-    delay(del);
-    }
+    for(int i =0; i <= 255; i+=steps)
+      {
+        analogWrite(leds[led], i);
+        delay(del);
+       
+      }
+   for(int j = 255 ; j >= 0; j-=steps)
+     {
+       analogWrite(leds[led], j);
+       delay(del);
+       //digitalWrite(leds[led],LOW);
+     }
+    
 }
+
+/*
+  // set the brightness of pin 9:
+  analogWrite(led, brightness);
+ 
+  // change the brightness for next time through the loop:
+  brightness = brightness + fadeAmount;
+ 
+  // reverse the direction of the fading at the ends of the fade:
+  if (brightness == 0 || brightness == 255) {
+    fadeAmount = -fadeAmount ;
+  }
+  // wait for 30 milliseconds to see the dimming effect
+  delay(30);
+}
+*/
 
 
 
