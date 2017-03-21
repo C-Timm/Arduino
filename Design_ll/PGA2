@@ -14,7 +14,7 @@
 #include <Wire.h>
 LiquidCrystal_I2C lcd(0x20, 20,2);
 
-int timer = 100;
+int timer = 200;
 char btn = 4;
 
 void setup() {
