@@ -10,12 +10,18 @@
  * Button: Pin 4
  * Led: Pins 8,10,11,12
  */
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+LiquidCrystal_I2C lcd(0x20, 20,2);
 
 int timer = 100;
 char btn = 4;
 
 void setup() {
 
+  lcd.init();
+  lcd.print("Assignment 2");
+  
   for(int led = 8; led <= 11; led++)
   {
     pinMode(led,OUTPUT);
@@ -29,7 +35,7 @@ void loop() {
     
     ledBac();
     
-  while (digitalRead(btn) == 1){}   // while the button is not pressed do nothing
+  while (!digitalRead(btn));   // while the button is not pressed do nothing
     
     
 }
