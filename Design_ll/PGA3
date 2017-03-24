@@ -5,23 +5,20 @@
  * than cyles through the leds[] backwards fading the leds on and off
  * as it goes.
  */
+#define btn digitalRead(4)
+ 
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 LiquidCrystal_I2C lcd(0x20, 20,2);
 
-
-
-#define btn digitalRead(4)
-
 const byte leds[] = {3,5,6,9,10,11};
 
- byte amLeds = (sizeof(leds)/sizeof(byte)), del = 10, steps = 5 ;
-
+ byte amLeds = (sizeof(leds)/sizeof(byte)-1), del = 10, steps = 5 ;
 
 void setup() {
   
   lcd.init();
-  lcd.print("Assignment 3");
+  lcd.print("PGA 3");
   
   for(int led = 0; led <= amLeds; led++)
     pinMode(led,OUTPUT);
@@ -44,7 +41,7 @@ void loop() {
  */
 void ledFor()
 {
-  for(byte led = 0; led <= amLeds; led++)
+  for(int led = 0; led <= amLeds; led++)
      fade(led);
 }
 
@@ -57,8 +54,8 @@ void ledFor()
  */
 void ledBac()
 {
-  for(byte led = amLeds - 1; led >= 0; led--)   
-     fade(led);
+  for(int k = amLeds-1; k >= 0; k--)   
+     fade(k);
 }
 /*
  * Fades led from 0 to 255 first in steps of the
@@ -67,22 +64,17 @@ void ledBac()
  * same value of "steps" than turns off led
  * so gwet ride of the residuale 
 */
-void fade(byte led)
+void fade(int led)
 {
-    for(byte i =0; i <= 255; i+=steps)
+    for(int i =0; i <= 255; i+=steps)
       {
         analogWrite(leds[led], i);
         delay(del);
-       
       }
-   for(byte j = 255 ; j >= 0; j-=steps)
+   for(int j = 255 ; j >= 0; j-=steps)
      {
        analogWrite(leds[led], j);
        delay(del);
-       
      }
     
 }
-
-
-
