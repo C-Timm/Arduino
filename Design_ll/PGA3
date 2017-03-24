@@ -13,9 +13,9 @@ LiquidCrystal_I2C lcd(0x20, 20,2);
 
 #define btn digitalRead(4)
 
-const uint8_t leds[] = {3,5,6,9,10,11};
+const byte leds[] = {3,5,6,9,10,11};
 
-int8_t amLeds = sizeof(leds)-1, del = 10, steps = 5 ;
+ byte amLeds = (sizeof(leds)/sizeof(byte)), del = 10, steps = 5 ;
 
 
 void setup() {
@@ -44,7 +44,7 @@ void loop() {
  */
 void ledFor()
 {
-  for(int led = 0; led <= amLeds; led++)
+  for(byte led = 0; led <= amLeds; led++)
      fade(led);
 }
 
@@ -57,7 +57,7 @@ void ledFor()
  */
 void ledBac()
 {
-  for(int led = amLeds - 1; led >= 0; led--)   
+  for(byte led = amLeds - 1; led >= 0; led--)   
      fade(led);
 }
 /*
@@ -67,39 +67,22 @@ void ledBac()
  * same value of "steps" than turns off led
  * so gwet ride of the residuale 
 */
-void fade(int led)
+void fade(byte led)
 {
-    for(int i =0; i <= 255; i+=steps)
+    for(byte i =0; i <= 255; i+=steps)
       {
         analogWrite(leds[led], i);
         delay(del);
        
       }
-   for(int j = 255 ; j >= 0; j-=steps)
+   for(byte j = 255 ; j >= 0; j-=steps)
      {
        analogWrite(leds[led], j);
        delay(del);
-       //digitalWrite(leds[led],LOW);
+       
      }
     
 }
-
-/*
-  // set the brightness of pin 9:
-  analogWrite(led, brightness);
- 
-  // change the brightness for next time through the loop:
-  brightness = brightness + fadeAmount;
- 
-  // reverse the direction of the fading at the ends of the fade:
-  if (brightness == 0 || brightness == 255) {
-    fadeAmount = -fadeAmount ;
-  }
-  // wait for 30 milliseconds to see the dimming effect
-  delay(30);
-}
-*/
-
 
 
 
