@@ -1,0 +1,94 @@
+/*
+ * 
+ * 
+ * 
+ */
+#define cbtn digitalRead(btns[0])
+#define rbtn digitalRead(btns[1])
+
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+unsigned long eTimes[9], btns[] = {7,8}, stime, elapse, av;
+char phrase[] = "Press yellow button 10 times";
+byte count;
+bool pressed, last;
+
+
+void setup() 
+{
+ 
+  lcd.begin(16, 2);
+   for(byte i =0; i < sizeof(btns); i++)
+   {
+     pinMode(btns[i], INPUT);
+   }
+  
+ 
+}
+
+void loop() {
+ pressed = (cbtn == 0); 
+  while(cbtn == 1 && count == 0)
+  {
+	scroll();
+  }
+  
+  if (pressed == HIGH && last == LOW && count < (sizeof(eTimes)/sizeof(unsigned long)) + 1)
+  {
+    stime = micros();
+    last = pressed;
+    delay(5);
+    count++;
+    lcd.setCursor(0,0);
+    lcd.clear();
+    lcd.print(count );
+  }
+  else if (pressed == LOW && last == HIGH && count< (sizeof(eTimes)/sizeof(unsigned long)) + 1)
+  {
+    elapse =  micros() - stime;
+    eTimes[(count-1)] = elapse;
+    last = pressed; 
+  }
+  last = pressed;
+
+  if(count == 10)
+  {  
+    for(byte i = 0; i < sizeof(eTimes)/sizeof(unsigned long); i++)
+      {
+      av += eTimes[i];
+      }
+    
+    lcd.clear();
+    lcd.println(av);
+    count++;
+    
+  }
+}
+
+/*
+ *
+ */
+void scroll()
+{
+  lcd.print(phrase);
+  delay(1500);
+
+ for(byte i = 0; i<sizeof(phrase)*10; i++)
+  {
+    if(cbtn == 0)
+        {
+          lcd.clear();
+          return;
+        }
+        lcd.scrollDisplayLeft();  
+        delay(150);
+  }
+
+  lcd.clear();
+  delay(500);
+}
+
+
+
+
