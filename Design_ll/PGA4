@@ -11,7 +11,7 @@
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 unsigned long eTimes[9], btns[] = {7,8}, stime, elapse, av;
 char phrase[] = "Press yellow button 10 times";
-byte count;
+byte count, size = (sizeof(eTimes)/sizeof(unsigned long)) + 1;
 bool pressed, last;
 
 
@@ -34,7 +34,7 @@ void loop() {
 	scroll();
   }
   
-  if (pressed == HIGH && last == LOW && count < (sizeof(eTimes)/sizeof(unsigned long)) + 1)
+  if (pressed == HIGH && last == LOW && count < size  )
   {
     stime = micros();
     last = pressed;
@@ -44,7 +44,7 @@ void loop() {
     lcd.clear();
     lcd.print(count );
   }
-  else if (pressed == LOW && last == HIGH && count< (sizeof(eTimes)/sizeof(unsigned long)) + 1)
+  else if (pressed == LOW && last == HIGH && count< size )
   {
     elapse =  micros() - stime;
     eTimes[(count-1)] = elapse;
@@ -54,7 +54,7 @@ void loop() {
 
   if(count == 10)
   {  
-    for(byte i = 0; i < sizeof(eTimes)/sizeof(unsigned long); i++)
+    for(byte i = 0; i < size-1 ; i++)
       {
       av += (eTimes[i]/1000000) % 60;
       }
@@ -88,7 +88,3 @@ void scroll()
   lcd.clear();
   delay(500);
 }
-
-
-
-
