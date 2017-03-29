@@ -9,7 +9,8 @@
 #include <LiquidCrystal.h>
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-unsigned long eTimes[9], btns[] = {7,8}, stime, elapse, av;
+unsigned long  btns[] = {7,8}, stime, elapse;
+long eTimes[9],av ;
 char phrase[] = "Press yellow button 10 times";
 byte count, size = (sizeof(eTimes)/sizeof(unsigned long)) + 1;
 bool pressed, last;
@@ -22,29 +23,32 @@ void setup()
    for(byte i =0; i < sizeof(btns); i++)
    {
      pinMode(btns[i], INPUT);
+     pinMode(10,OUTPUT);
    }
   
- 
+   //lcd.print(size);
 }
 
 void loop() {
  pressed = (cbtn == 0); 
+
+  
   while(cbtn == 1 && count == 0)
   {
 	scroll();
   }
   
-  if (pressed == HIGH && last == LOW && count < size  )
+  if (pressed == HIGH && last == LOW && count <= size  )
   {
     stime = micros();
     last = pressed;
     delay(5);
     count++;
-    lcd.setCursor(0,0);
-    lcd.clear();
-    lcd.print(count );
+    lcd.home();
+    
+    lcd.print(String("count:") + String(count));
   }
-  else if (pressed == LOW && last == HIGH && count< size )
+  else if (pressed == LOW && last == HIGH && count <= size )
   {
     elapse =  micros() - stime;
     eTimes[(count-1)] = elapse;
@@ -52,18 +56,24 @@ void loop() {
   }
   last = pressed;
 
-  if(count == 10)
+  if(count == 11)
   {  
     for(byte i = 0; i < size-1 ; i++)
       {
-      av += (eTimes[i]/1000000) % 60;
+      av += (eTimes[i]/100000)%60;
       }
     
-    lcd.clear();
-    lcd.println(av);
-    count++;
-    
+      lcd.clear();
+      lcd.println((av/size),3);
+      count++;
   }
+  
+ while (rbtn == 0)
+    {
+  	 reset();
+  	}
+   
+        
 }
 
 /*
@@ -74,17 +84,29 @@ void scroll()
   lcd.print(phrase);
   delay(1500);
 
- for(byte i = 0; i<sizeof(phrase)*10; i++)
-  {
-    if(cbtn == 0)
-        {
-          lcd.clear();
-          return;
-        }
-        lcd.scrollDisplayLeft();  
-        delay(150);
-  }
+   for(byte i = 0; i < sizeof(phrase)*10; i++)
+    {
+      if(cbtn == 0)
+          {
+            lcd.clear();
+            return;
+          }
+     lcd.scrollDisplayLeft();  
+     delay(150);
+    }
 
   lcd.clear();
   delay(500);
 }
+
+/*
+ *
+ *
+ */
+void reset()
+  {
+    lcd.clear();
+    scroll();
+    count = 0;
+  }  
+  
