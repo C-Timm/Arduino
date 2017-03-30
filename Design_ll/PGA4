@@ -10,7 +10,7 @@
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 unsigned long  btns[] = {7,8}, stime, elapse;
-long eTimes[9],av ;
+float eTimes[9],av ;
 char phrase[] = "Press yellow button 10 times";
 byte count, size = (sizeof(eTimes)/sizeof(unsigned long)) + 1;
 bool pressed, last;
@@ -30,7 +30,7 @@ void setup()
 }
 
 void loop() {
- pressed = (cbtn == 0); 
+ pressed = (cbtn == 0);
 
   
   while(cbtn == 1 && count == 0)
@@ -40,17 +40,17 @@ void loop() {
   
   if (pressed == HIGH && last == LOW && count <= size  )
   {
-    stime = micros();
+    stime = millis();
     last = pressed;
     delay(5);
     count++;
     lcd.home();
     
-    lcd.print(String("count:") + String(count));
+    lcd.println(String("count: ") + String(count) );
   }
   else if (pressed == LOW && last == HIGH && count <= size )
   {
-    elapse =  micros() - stime;
+    elapse =  millis() - stime;
     eTimes[(count-1)] = elapse;
     last = pressed; 
   }
@@ -60,19 +60,18 @@ void loop() {
   {  
     for(byte i = 0; i < size-1 ; i++)
       {
-      av += (eTimes[i]/100000)%60;
+      av += (eTimes[i]/100.0);
       }
     
       lcd.clear();
-      lcd.println((av/size),3);
+      lcd.println(String("average time") + (av/10));
       count++;
   }
   
  while (rbtn == 0)
     {
   	 reset();
-  	}
-   
+ 	}
         
 }
 
@@ -99,14 +98,15 @@ void scroll()
   delay(500);
 }
 
-/*
- *
- *
- */
 void reset()
   {
+  lcd.clear();
+  lcd.print("reset");
+  delay(1500);
     lcd.clear();
-    scroll();
-    count = 0;
+  	scroll();
+	count = 0;
+  
+
   }  
   
