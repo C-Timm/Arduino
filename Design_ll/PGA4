@@ -6,47 +6,47 @@
 #define cbtn digitalRead(btns[0])
 #define rbtn digitalRead(btns[1])
 
-//#include <LiquidCrystal.h>
-#include <LiquidCrystal_I2C.h>
-#include <Wire.h>
+#include <LiquidCrystal.h>
+//#include <LiquidCrystal_I2C.h>
+//#include <Wire.h>
 
-//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-LiquidCrystal_I2C lcd(0x20,16,2);
-byte btns[] = {2,8}, stime, elapse;
-byte eTimes[10], av ;
+LiquidCrystal lcd(5, 7, 10, 11, 12, 13);
+//LiquidCrystal_I2C lcd(0x20,16,2);
+byte btns[] = {8,0}, stime, elapse;
+float eTimes[10], av ;
 char phrase[] = "Press yellow button 10 times";
-byte count =0,count2, size = (sizeof(eTimes)/sizeof(float)) ;
-bool pressed = HIGH, last;
+byte count =0,count2, size = (sizeof(eTimes)/sizeof(float)), led = 9 ;
+bool pressed /*= HIGH*/, last;
 
 byte delVal =150;
 void setup() 
 {
  
-  //lcd.begin(16, 2);
-  lcd.init();
+  lcd.begin(16, 2);
+  //lcd.init();
   Serial.begin(9600);
    for(byte i =0; i < sizeof(btns); i++)
    {
      pinMode(btns[i], INPUT);
    }
  
-  pinMode(5,OUTPUT);
+  pinMode(led,OUTPUT);
 }
 
 void loop() {
 
  //attachInterrupt(0, scroll_ISR, LOW);
-// pressed = HIGH;//(cbtn == 0) ; 
+ pressed = (cbtn == 0) ; 
 
 //Attach interrupts and do this with a delay that switchs the start to get average times
 
 //attachInterrupt(0, scroll, FALLING);
   
- /*if(cbtn == 1 && count == 0)
+ if(cbtn == 1 && count == 0)
   {
     scroll_ISR();
   }
-  */
+  
 //  pressed = HIGH;
   //
  // delay(10);
@@ -58,7 +58,7 @@ void loop() {
      count++;
     lcd.home();
     lcd.print(count);
-    digitalWrite(5,HIGH);
+    digitalWrite(led , HIGH);
    
    // delay(5);
   }
@@ -70,19 +70,11 @@ void loop() {
     eTimes[count2] = elapse;
     count2++;
     last = pressed;
-     digitalWrite(5,LOW);
+     digitalWrite(led,LOW);
   }
   last = pressed;
-  btnPress();
- /*  delay(delVal);
-    if(pressed ==LOW)
-    {
-      pressed = HIGH;
-    }
-    else
-    {
-      pressed = LOW;
-    }*/
+ // btnPress();
+ 
   if(count == 11)
   {  
     int n = 0;
@@ -92,10 +84,10 @@ void loop() {
         Serial.print(n);
          Serial.print(": ");
         Serial.println(eTimes[i]);
-      av += (eTimes[i]/1000.0);
-       n++;
+        av += (eTimes[i]/1000.0);
+       
       }
-    
+       digitalWrite(led,LOW);
       lcd.clear();
       lcd.print((av/10.0),8);
       lcd.setCursor(0,1);
