@@ -7,9 +7,11 @@
 #define rbtn digitalRead(btns[1])
 
 #include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
 
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-unsigned long  btns[] = {7,8}, stime, elapse;
+//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+LiquidCrystal lcd(0x20,16,2);
+unsigned long  btns[] = {2,8}, stime, elapse;
 float eTimes[9],av ;
 char phrase[] = "Press yellow button 10 times";
 byte count, size = (sizeof(eTimes)/sizeof(unsigned long)) + 1;
@@ -20,6 +22,7 @@ void setup()
 {
  
   lcd.begin(16, 2);
+  Serial.begin(9600);
    for(byte i =0; i < sizeof(btns); i++)
    {
      pinMode(btns[i], INPUT);
@@ -28,24 +31,27 @@ void setup()
 }
 
 void loop() {
- pressed = (cbtn == 0); 
+ //pressed = cbtn ; 
 
 //Attach interrupts and do this with a delay that switchs the start to get average times
-
+	attachInterrupt(0, scroll, LOW);
   
-  while(cbtn == 1 && count == 0)
+  /*while(cbtn == 1 && count == 0)
   {
     scroll();
   }
+  */
+  pressed = HIGH;
+  delay(10);
   
   if (pressed == HIGH && last == LOW && count <= size  )
   {
     stime = millis();
     last = pressed;
-    delay(5);
     count++;
     lcd.home();
     lcd.print(count);
+    pressed = LOW;
   }
   else if (pressed == LOW && last == HIGH && count <= size )
   {
@@ -59,19 +65,19 @@ void loop() {
   {  
     for(byte i = 0; i < size-1 ; i++)
       {
-      av += (eTimes[i]/100.0);
+      av += (eTimes[i]);
       }
     
       lcd.clear();
-      lcd.println((av/10),5);
+      Serial.println((av/10),5);
       count++;
   }
   
- while (rbtn == 0)
+ /*while (rbtn == 0)
     {
      reset();
     }
-   
+   */
         
 }
 
