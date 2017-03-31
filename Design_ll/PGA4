@@ -1,5 +1,17 @@
 /*
+ * C.Timm 3/31/2017 PGA4
+ * Program counts the ellasped time between 10 button 
+ * presses and stores the values in an array Than prints 
+ * the average to the lcd screen. Every time the button 
+ * is pressed the led willl blink. There is allso a reset 
+ * button on pin 12
  * 
+ * Buttons: 
+ *          cbtn = counter button: pin 4
+ *          rbtn = reset button : pin 12
+ * led:
+ *      led : pin 9
+ *     
  * 
  * 
  */
@@ -12,19 +24,20 @@
 
 LiquidCrystal lcd(5, 7, 10, 11, 12, 13);
 //LiquidCrystal_I2C lcd(0x20,16,2);
-byte btns[] = {8,0}, stime, elapse;
+byte btns[] = {4,12}, stime, elapse;
 float eTimes[10], av ;
 char phrase[] = "Press yellow button 10 times";
-byte count =0,count2, size = (sizeof(eTimes)/sizeof(float)), led = 9 ;
+byte count, size = (sizeof(eTimes)/sizeof(float)), led = 9 ;
 bool pressed /*= HIGH*/, last;
 
-byte delVal =150;
+byte delVal = 150;
+
 void setup() 
 {
  
   lcd.begin(16, 2);
   //lcd.init();
-  Serial.begin(9600);
+
    for(byte i =0; i < sizeof(btns); i++)
    {
      pinMode(btns[i], INPUT);
@@ -35,21 +48,13 @@ void setup()
 
 void loop() {
 
- //attachInterrupt(0, scroll_ISR, LOW);
  pressed = (cbtn == 0) ; 
-
-//Attach interrupts and do this with a delay that switchs the start to get average times
-
-//attachInterrupt(0, scroll, FALLING);
-  
- if(cbtn == 1 && count == 0)
+ 
+if(cbtn == 1 && count == 0)
   {
-    scroll_ISR();
+    scroll();
   }
   
-//  pressed = HIGH;
-  //
- // delay(10);
   
   if (pressed == HIGH && last == LOW && count <= size+1  )
   {
@@ -67,34 +72,20 @@ void loop() {
   {
  
     elapse =  millis() - stime;
-    eTimes[count2] = elapse;
-    count2++;
+    eTimes[count-1] = elapse;
     last = pressed;
      digitalWrite(led,LOW);
   }
   last = pressed;
- // btnPress();
+  //btnPress();  Onlys used for grading 
  
-  if(count == 11)
+ //After 10 button presses
+  if(count == size+1)
   {  
-    int n = 0;
-    for(byte i = 0; i < size ; i++)
-      {
-       
-        Serial.print(n);
-         Serial.print(": ");
-        Serial.println(eTimes[i]);
-        av += (eTimes[i]/1000.0);
-       
-      }
-       digitalWrite(led,LOW);
-      lcd.clear();
-      lcd.print((av/10.0),5);
-      lcd.setCursor(0,1);
-      lcd.print( "seconds");    
-      count++;
+    Calc();
   }
-  
+ 
+   
 while (rbtn == 0)
     {
      reset();
@@ -102,11 +93,30 @@ while (rbtn == 0)
   
         
 }
+/*
+ * sums all the ellasped times in eTimes[] and 
+ * then converts them to seconds  and prints 
+ * them to lcd screen
+ */
+
+void Calc()
+{
+   for(byte i = 0; i < size ; i++)
+      {
+        av += (eTimes[i]/1000.0);
+      }
+      digitalWrite(led,LOW);
+      lcd.clear();
+      lcd.print((av/10.0),5);
+      lcd.setCursor(0,1);
+      lcd.print( "seconds");    
+      count++;
+ }
 
 /*
- *
+ * Scrolls through message on lcd screen 
  */
-void scroll_ISR()
+void scroll()
 {
   lcd.print(phrase);
   delay(1500);
@@ -119,11 +129,11 @@ void scroll_ISR()
             return;
           }
      lcd.scrollDisplayLeft();  
-     delay(150);
+    delay(400);
     }
 
 /*
- * 
+ * Simulates a butn press, just switchs the value of pressed 
  */
 }
 void btnPress()
@@ -141,16 +151,13 @@ void btnPress()
     
 }
 /*
- * 
+ * Reset button 
  */
 void reset()
   {
-  lcd.clear();
-  lcd.print("reset");
-  delay(1500);
     lcd.clear();
-    scroll_ISR();
-  count = 0;
-  
-
+    lcd.print("reset");
+    delay(1500);
+    scroll();
+    count = 0;
   } 
