@@ -6,92 +6,122 @@
 #define cbtn digitalRead(btns[0])
 #define rbtn digitalRead(btns[1])
 
-#include <LiquidCrystal.h>
+//#include <LiquidCrystal.h>
 #include <LiquidCrystal_I2C.h>
+#include <Wire.h>
 
 //LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-LiquidCrystal lcd(0x20,16,2);
-unsigned long  btns[] = {2,8}, stime, elapse;
-float eTimes[9],av ;
+LiquidCrystal_I2C lcd(0x20,16,2);
+byte btns[] = {2,8}, stime, elapse;
+byte eTimes[10], av ;
 char phrase[] = "Press yellow button 10 times";
-byte count, size = (sizeof(eTimes)/sizeof(unsigned long)) + 1;
-bool pressed, last;
+byte count =0,count2, size = (sizeof(eTimes)/sizeof(float)) ;
+bool pressed = HIGH, last;
 
-
+byte delVal =150;
 void setup() 
 {
  
-  lcd.begin(16, 2);
+  //lcd.begin(16, 2);
+  lcd.init();
   Serial.begin(9600);
    for(byte i =0; i < sizeof(btns); i++)
    {
      pinMode(btns[i], INPUT);
    }
-  
+ 
+  pinMode(5,OUTPUT);
 }
 
 void loop() {
- //pressed = cbtn ; 
+
+ //attachInterrupt(0, scroll_ISR, LOW);
+// pressed = HIGH;//(cbtn == 0) ; 
 
 //Attach interrupts and do this with a delay that switchs the start to get average times
-	attachInterrupt(0, scroll, LOW);
+
+//attachInterrupt(0, scroll, FALLING);
   
-  /*while(cbtn == 1 && count == 0)
+ /*if(cbtn == 1 && count == 0)
   {
-    scroll();
+    scroll_ISR();
   }
   */
-  pressed = HIGH;
-  delay(10);
+//  pressed = HIGH;
+  //
+ // delay(10);
   
-  if (pressed == HIGH && last == LOW && count <= size  )
+  if (pressed == HIGH && last == LOW && count <= size+1  )
   {
     stime = millis();
     last = pressed;
-    count++;
+     count++;
     lcd.home();
     lcd.print(count);
-    pressed = LOW;
+    digitalWrite(5,HIGH);
+   
+   // delay(5);
   }
-  else if (pressed == LOW && last == HIGH && count <= size )
+  
+  else if (pressed == LOW && last == HIGH && count <= size+1)
   {
+ 
     elapse =  millis() - stime;
-    eTimes[(count-1)] = elapse;
-    last = pressed; 
+    eTimes[count2] = elapse;
+    count2++;
+    last = pressed;
+     digitalWrite(5,LOW);
   }
   last = pressed;
-
-  if(count == 11)
+  btnPress();
+ /*  delay(delVal);
+    if(pressed ==LOW)
+    {
+      pressed = HIGH;
+    }
+    else
+    {
+      pressed = LOW;
+    }*/
+  if(count == 10)
   {  
-    for(byte i = 0; i < size-1 ; i++)
+    int n = 0;
+    for(byte i = 0; i < size ; i++)
       {
-      av += (eTimes[i]);
+       
+        Serial.print(n);
+         Serial.print(": ");
+        Serial.println(eTimes[i]);
+      av += (eTimes[i]/1000.0);
+       n++;
       }
     
       lcd.clear();
-      Serial.println((av/10),5);
+      lcd.print((av/10.0),8);
+      lcd.setCursor(0,1);
+     lcd.print(size); 
       count++;
   }
   
- /*while (rbtn == 0)
+while (rbtn == 0)
     {
      reset();
     }
-   */
+  
         
 }
 
 /*
  *
  */
-void scroll()
+void scroll_ISR()
 {
   lcd.print(phrase);
   delay(1500);
 
    for(byte i = 0; i < sizeof(phrase)*10; i++)
     {
-      if(cbtn == 0)
+     if(cbtn == 0)
           {
             lcd.clear();
             return;
@@ -100,19 +130,30 @@ void scroll()
      delay(150);
     }
 
-  lcd.clear();
-  delay(500);
-}
 
+}
+void btnPress()
+{
+  delay(delVal);
+  if(pressed ==LOW)
+  {
+    pressed = HIGH;
+  }
+  else
+  {
+    pressed = LOW;
+  }
+    return;
+    
+}
 void reset()
   {
   lcd.clear();
   lcd.print("reset");
   delay(1500);
     lcd.clear();
-    scroll();
+    scroll_ISR();
   count = 0;
   
 
-  }  
-  
+  } 
