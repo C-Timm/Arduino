@@ -89,9 +89,9 @@ void loop() {
       }
        digitalWrite(led,LOW);
       lcd.clear();
-      lcd.print((av/10.0),8);
+      lcd.print((av/10.0),5);
       lcd.setCursor(0,1);
-     lcd.print(size); 
+      lcd.print( "seconds");    
       count++;
   }
   
@@ -122,7 +122,9 @@ void scroll_ISR()
      delay(150);
     }
 
-
+/*
+ * 
+ */
 }
 void btnPress()
 {
@@ -138,6 +140,9 @@ void btnPress()
     return;
     
 }
+/*
+ * 
+ */
 void reset()
   {
   lcd.clear();
