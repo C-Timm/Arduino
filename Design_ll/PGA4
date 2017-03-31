@@ -6,41 +6,36 @@
 #define cbtn digitalRead(btns[0])
 #define rbtn digitalRead(btns[1])
 
-//#include <LiquidCrystal.h>
+#include <LiquidCrystal.h>
 
-//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-#include <LiquidCrystal_I2C.h>
-#include <Wire.h>
-
-LiquidCrystal_I2C lcd(0x20,16,2);
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 unsigned long  btns[] = {7,8}, stime, elapse;
-long eTimes[9],av ;
+float eTimes[9],av ;
 char phrase[] = "Press yellow button 10 times";
-byte  size = (sizeof(eTimes)/sizeof(unsigned long)) + 1;
+byte count, size = (sizeof(eTimes)/sizeof(unsigned long)) + 1;
 bool pressed, last;
-byte count;
+
 
 void setup() 
 {
  
-  //lcd.begin(16, 2);
-  lcd.init();
+  lcd.begin(16, 2);
    for(byte i =0; i < sizeof(btns); i++)
    {
      pinMode(btns[i], INPUT);
-     pinMode(10,OUTPUT);
    }
   
-   //lcd.print(size);
 }
 
 void loop() {
- pressed = cbtn ;
+ pressed = (cbtn == 0); 
+
+//Attach interrupts and do this with a delay that switchs the start to get average times
 
   
   while(cbtn == 1 && count == 0)
   {
-	scroll();
+    scroll();
   }
   
   if (pressed == HIGH && last == LOW && count <= size  )
@@ -50,8 +45,7 @@ void loop() {
     delay(5);
     count++;
     lcd.home();
-    
-    lcd.print(String("count: ") + String(count) );
+    lcd.print(count);
   }
   else if (pressed == LOW && last == HIGH && count <= size )
   {
@@ -65,22 +59,19 @@ void loop() {
   {  
     for(byte i = 0; i < size-1 ; i++)
       {
-      av += (eTimes[i]/100) %3600;
+      av += (eTimes[i]/100.0);
       }
     
       lcd.clear();
-      lcd.print("average time");
-      lcd.setCursor(0,1);
-      
-      lcd.print(av/10);
-      lcd.print(" seconds");
+      lcd.println((av/10),5);
       count++;
   }
   
-  if (rbtn == 0)
+ while (rbtn == 0)
     {
-  	 reset();
-     }
+     reset();
+    }
+   
         
 }
 
@@ -98,7 +89,7 @@ void scroll()
           {
             lcd.clear();
             return;
-           } 
+          }
      lcd.scrollDisplayLeft();  
      delay(150);
     }
@@ -112,8 +103,10 @@ void reset()
   lcd.clear();
   lcd.print("reset");
   delay(1500);
-  lcd.clear();
- // scroll();
+    lcd.clear();
+    scroll();
   count = 0;
+  
+
   }  
   
