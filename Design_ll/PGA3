@@ -1,80 +1,163 @@
 /*
- * C. Timm  3/20/2017  PGA3_Timm
- * Program that cyles through 6 leds in an array 
- * it cycles up through the leds[] fading them on and off each time 
- * than cyles through the leds[] backwards fading the leds on and off
- * as it goes.
+ * C.Timm 3/31/2017 PGA4
+ * Program counts the ellasped time between 10 button 
+ * presses and stores the values in an array Than prints 
+ * the average to the lcd screen. Every time the button 
+ * is pressed the led willl blink. There is allso a reset 
+ * button on pin 12
+ * 
+ * Buttons: 
+ *          cbtn = counter button: pin 4
+ *          rbtn = reset button : pin 12
+ * led:
+ *      led : pin 9
+ *     
+ * 
+ * 
  */
-#define btn digitalRead(4)
+#define cbtn digitalRead(btns[0])
+#define rbtn digitalRead(btns[1])
+
+#include <LiquidCrystal.h>
+//#include <LiquidCrystal_I2C.h>
+//#include <Wire.h>
+
+LiquidCrystal lcd(5, 7, 10, 11, 12, 13);
+//LiquidCrystal_I2C lcd(0x20,16,2);
+byte btns[] = {4,12}, stime, elapse;
+float eTimes[10], av ;
+char phrase[] = "Press yellow button 10 times";
+byte count, size = (sizeof(eTimes)/sizeof(float)), led = 9 ;
+bool pressed /*= HIGH*/, last;
+
+byte delVal = 150;
+
+void setup() 
+{
  
-#include <LiquidCrystal_I2C.h>
-#include <Wire.h>
-LiquidCrystal_I2C lcd(0x20, 20,2);
+  lcd.begin(16, 2);
+  //lcd.init();
 
-const byte leds[] = {3,5,6,9,10,11};
-
- byte amLeds = (sizeof(leds)/sizeof(byte)-1), del = 10, steps = 5 ;
-
-void setup() {
-  
-  lcd.init();
-  lcd.print("PGA 3");
-  
-  for(int led = 0; led <= amLeds; led++)
-    pinMode(led,OUTPUT);
-    pinMode(4,INPUT);
- }
+   for(byte i =0; i < sizeof(btns); i++)
+   {
+     pinMode(btns[i], INPUT);
+   }
+ 
+  pinMode(led,OUTPUT);
+}
 
 void loop() {
 
-    ledFor();
-    ledBac();
-    
-  while (btn); // while the button is not pressed do nothing
+ pressed = (cbtn == 0) ; 
+ 
+if(cbtn == 1 && count == 0)
+  {
+    scroll();
+  }
+  
+  
+  if (pressed == HIGH && last == LOW && count <= size+1  )
+  {
+    stime = millis();
+    last = pressed;
+     count++;
+    lcd.home();
+    lcd.print(count);
+    digitalWrite(led , HIGH);
    
+   // delay(5);
+  }
+  
+  else if (pressed == LOW && last == HIGH && count <= size+1)
+  {
+ 
+    elapse =  millis() - stime;
+    eTimes[count-1] = elapse;
+    last = pressed;
+     digitalWrite(led,LOW);
+  }
+  last = pressed;
+  //btnPress();  Onlys used for grading 
+ 
+ //After 10 button presses
+  if(count == size+1)
+  {  
+    Calc();
+  }
+ 
+   
+while (rbtn == 0)
+    {
+     reset();
+    }
+  
+        
 }
-
 /*
- * Loops through leds[] in the forward direction 
- * i.e. 3,5,6,9,10,11 and passes each led value 
- * to the fade(int) function 
+ * sums all the ellasped times in eTimes[] and 
+ * then converts them to seconds  and prints 
+ * them to lcd screen
  */
-void ledFor()
-{
-  for(int led = 0; led <= amLeds; led++)
-     fade(led);
-}
 
-/*
- * Loops through leds[] in the backwards direction 
- * i.e. 10,9,6,5,3 and passes each led value 
- * to the fade(int) function. Doesnt pass 11
- * becaseu we dont want to fade the last led
- * twice
- */
-void ledBac()
+void Calc()
 {
-  for(int k = amLeds-1; k >= 0; k--)   
-     fade(k);
-}
-/*
- * Fades led from 0 to 255 first in steps of the
- * varible "steps" which is defined above.
- * Then fades led from 255 to 0 in using the 
- * same value of "steps" than turns off led
- * so gwet ride of the residuale 
-*/
-void fade(int led)
-{
-    for(int i =0; i <= 255; i+=steps)
+   for(byte i = 0; i < size ; i++)
       {
-        analogWrite(leds[led], i);
-        delay(del);
+        av += (eTimes[i]/1000.0);
       }
-   for(int j = 255 ; j >= 0; j-=steps)
-     {
-       analogWrite(leds[led], j);
-       delay(del);
-     }
+      digitalWrite(led,LOW);
+      lcd.clear();
+      lcd.print((av/10.0),5);
+      lcd.setCursor(0,1);
+      lcd.print( "seconds");    
+      count++;
+ }
+
+/*
+ * Scrolls through message on lcd screen 
+ */
+void scroll()
+{
+  lcd.print(phrase);
+  delay(1500);
+
+   for(byte i = 0; i < sizeof(phrase)*10; i++)
+    {
+     if(cbtn == 0)
+          {
+            lcd.clear();
+            return;
+          }
+     lcd.scrollDisplayLeft();  
+    delay(400);
+    }
+
+/*
+ * Simulates a butn press, just switchs the value of pressed 
+ */
+}
+void btnPress()
+{
+  delay(delVal);
+  if(pressed ==LOW)
+  {
+    pressed = HIGH;
+  }
+  else
+  {
+    pressed = LOW;
+  }
+    return;
     
 }
+/*
+ * Reset button 
+ */
+void reset()
+  {
+    lcd.clear();
+    lcd.print("reset");
+    delay(1500);
+    scroll();
+    count = 0;
+  } 
