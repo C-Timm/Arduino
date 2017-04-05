@@ -136,19 +136,22 @@ void scroll()
  * Simulates a butn press, just switchs the value of pressed 
  */
 }
-void btnPress()
+bool btnPress()
 {
+  static bool pressed;
+byte delVal =150;
   delay(delVal);
   if(pressed ==LOW)
   {
+    return true;
     pressed = HIGH;
   }
   else
   {
+    return false;
     pressed = LOW;
   }
-    return;
-    
+  
 }
 /*
  * Reset button 
