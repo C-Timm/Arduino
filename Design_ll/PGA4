@@ -26,7 +26,7 @@ LiquidCrystal lcd(5, 7, 10, 11, 12, 13);
 //LiquidCrystal_I2C lcd(0x20,16,2);
 byte btns[] = {4,12}, stime, elapse;
 float eTimes[10], av ;
-char phrase[] = "Press yellow button 10 times";
+char phrase[] = "Press top button 10 times";
 byte count, size = (sizeof(eTimes)/sizeof(float)), led = 9 ;
 bool pressed /*= HIGH*/, last;
 
