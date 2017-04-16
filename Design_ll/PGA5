@@ -1,0 +1,112 @@
+/*
+C.Timm PGA5 04/15/2017
+count starts at 90  if button on pin 7 is pressed ("incbtn")
+the count increases to 140 led on pin 9 turns on,
+led on pin 10 turns off
+if the button on pin 12 is pressed ("decbtn") the 
+count decrease down to 40 and led on pin 10 turns, 
+led on pin 9 turns off. 
+
+if button on pin 4 is pressed count stops,
+leds on pin 9 & 10 got off,
+and led on pin 6 turns on 
+
+*/
+#define incBtn digitalRead(7)
+#define decBtn digitalRead(12)
+#define stpBtn digitalRead(4)
+
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
+byte led[] = {9,10,6} ,
+     count = 90, del = 200;
+
+LiquidCrystal_I2C lcd(0x20,16,2);
+
+
+void setup() {
+  lcd.init();
+  lcd.print(count);
+    pinMode(7, INPUT);
+    pinMode(12, INPUT);
+    pinMode(4, INPUT); 
+  for(byte i =0; i < sizeof(led); i++)
+     pinMode(led[i], OUTPUT);
+    
+}
+
+void loop() {
+ if(!stpBtn)
+      Stop();
+    
+    
+  while(!incBtn)
+    {
+       if(!stpBtn)
+            Stop();
+
+        change(1);
+     }
+ while(!decBtn)
+   {
+       if(!stpBtn)
+          Stop();
+
+      change(-1);
+   }
+}
+/*
+    Takes in either a postive 1 or a degative one 
+    depending on if the count is going up or down 
+*/
+void change(int one)
+{
+  bool tog = false;
+  if(one > 0)
+    tog = true;
+
+   while(count < 140 || count > 40)
+   {
+  
+    if(count == 140 && tog)
+    return;
+   
+    if(count == 40 &&!tog)
+    return;
+    
+      
+      if(!stpBtn)
+    {
+      Stop();
+    } 
+    
+     lcd.home();
+     digitalWrite(led[!tog], HIGH);
+     digitalWrite(led[tog], LOW);
+     lcd.home();
+     count = count + one;
+     lcd.print(count); 
+     delay(del);
+   
+   }
+}
+
+void Stop()
+{
+    lcd.home();
+    byte val = count;
+    lcd.print("value = ");
+    lcd.print(val);
+   digitalWrite(led[2], HIGH);
+   digitalWrite(led[0], LOW);
+   digitalWrite(led[1], LOW);
+   delay(5000);
+   
+ while(stpBtn){}
+   
+   lcd.clear();
+    digitalWrite(led[2], LOW);
+   return;
+  
+}
