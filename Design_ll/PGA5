@@ -66,13 +66,13 @@ void change(int one)
   if(one > 0)
     tog = true;
 
-   while(count < 140 || count > 40)
+   while(count < 140 || count > 45)
    {
   
     if(count == 140 && tog)
     return;
    
-    if(count == 40 &&!tog)
+    if(count == 45 &&!tog)
     return;
     
       
