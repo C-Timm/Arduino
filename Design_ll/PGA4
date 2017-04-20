@@ -143,13 +143,15 @@ byte delVal =150;
   delay(delVal);
   if(pressed ==LOW)
   {
+   pressed = HIGH;
     return true;
-    pressed = HIGH;
+   
   }
   else
   {
+   pressed = LOW;
     return false;
-    pressed = LOW;
+   
   }
   
 }
