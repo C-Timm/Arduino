@@ -1,0 +1,47 @@
+/* J. McInnis		3/31/2017		Encoder
+
+Set up rotary encoder count in Arduino
+Display on LCD
+
+Phase A: Pin 2 (interrupt 0)
+Phase B: Pin 3
+*/
+//Libraries
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
+LiquidCrystal_I2C LCD(0x20, 16, 2);
+static volatile int enc = 0; //count from encoder
+int PhaseB = 3;
+
+//Interrupt Service Routine
+void OptoISR()
+{
+	if(digitalRead(PhaseB) == 0)
+	{
+		enc++;
+	}
+	else
+	{
+		enc--;
+	}
+}
+
+void setup() {
+  // put your setup code here, to run once:
+
+  LCD.init();
+  attachInterrupt(0, OptoISR, RISING); //Phase A is on pin 2, int0
+  
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  float distance;
+	LCD.clear();
+	LCD.print(enc);
+	LCD.setCursor(0,1);
+	LCD.print(enc/128.0);
+	LCD.print(" rev");
+	delay(1000);
+}
