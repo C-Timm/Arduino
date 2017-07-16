@@ -5,22 +5,25 @@
 
 LiquidCrystal lcd(5, 6, 9, 10, 12, 13);
 
-float input_voltage = 0.0, temp=0.0, r1=100000.0, r2=10000.0;
+float input_voltage = 0.0, temp=0.0, r1=100000.0, r2=10000.0, cutoff = 2.0;
 
 unsigned long Watch, _micro, time = micros();
 unsigned int Clock = 0, R_clock;
 boolean Reset = false, Stop = false, Paused = false, _type;
 volatile boolean timeFlag = false;
-byte count, voltage = 15, cutoff = 2.0;
+byte count =0, voltage = 15, sigfigs = 3;
 
 void setup()
 {
       //  opens serial port, sets data rate to 9600 bps
    lcd.begin(16, 2);       //// set up the LCD's number of columns and rows: 
-   Serial.begin(115200);
+   Serial.begin(9600);
    lcd.print("Voltage= ");
-   SetTimer(0,0,0); // Starting time 
-   StartTimer();
+   lcd.print(input_voltage,sigfigs);
+   
+  SetTimer(0,0,0); // Starting time 
+  StartTimer();
+    
 }
 void loop()
 {
@@ -33,35 +36,43 @@ void loop()
    
    if (input_voltage < 0.1) 
    {
-     input_voltage=0.0;
+     input_voltage = 0.0;
    } 
-   
-  lcd.print(input_voltage,4);
-  CountUpDownTimer(UP); // run the timer
-if (count < 1 )
+
+
+if (count < 1  &&  input_voltage > 0.0)
 {
   Serial.print("Starting Voltage: ");
-   Serial.print(input_voltage);
+   Serial.print(input_voltage, sigfigs);
+
    count++;
 }
-  // this prevents the time from being constantly shown.
-  if (TimeHasChanged() ) 
+ if (count >=1)
   {
+      CountUpDownTimer(UP); 
+  }
+   
+  // this prevents the time from being constantly shown.
+  if (TimeHasChanged() && count >= 1) 
+  {
+    lcd.setCursor(0, 0);
+    lcd.print("Voltage = ");
+    lcd.print(input_voltage,sigfigs);
     lcd.setCursor(0, 1);
     lcd.print(ShowHours());
     lcd.print(":");
     lcd.print(ShowMinutes());
     lcd.print(":");
     lcd.print(ShowSeconds());
-    lcd.print(":");
-    lcd.print(ShowMilliSeconds());
-    lcd.print(":");
-    lcd.println(ShowMicroSeconds());
+   // lcd.print(":");
+//    lcd.print(ShowMilliSeconds());
+//    lcd.print(":");
+//    lcd.println(ShowMicroSeconds());
     // This DOES NOT format the time to 0:0x when seconds is less than 10.
     // if you need to format the time to standard format, use the sprintf() function.
   }
     void Record();
-    if (input_voltage == cutoff)
+    if (input_voltage <= cutoff && input_voltage >= 1.0)
     {
       StopTimer(); 
       Serial.print("Cut off point reached in ");
@@ -71,8 +82,9 @@ if (count < 1 )
       Serial.print(":");
       Serial.print(ShowSeconds());
       Serial.println("Voltage = ");
-      Serial.print(input_voltage);
+      Serial.print(input_voltage, sigfigs);
     }
+
 }
 /*
  * Records the time it took to reach different votlages 
@@ -84,7 +96,7 @@ if (count < 1 )
     if (input_voltage == voltage && input_voltage >= iter)
     {
       Serial.print("Time to ");
-      Serial.print(input_voltage);
+      Serial.print(input_voltage, sigfigs);
       Serial.print(" votls");
       Serial.println(ShowHours());
       Serial.print(":");
@@ -217,4 +229,5 @@ boolean TimeCheck(unsigned int hours, unsigned int minutes, unsigned int seconds
 {
   return (hours == ShowHours() && minutes == ShowMinutes() && seconds == ShowSeconds());
 }
+
 
