@@ -1,0 +1,71 @@
+
+//Uses 2 pin button on pin 2 to put ardunio into sleep mode. and on board led an d13
+
+#include <avr/sleep.h>
+
+// connect a button between pin 2 and ground
+
+const int buttonPin = 2;  // int 0 pin, connected to button
+const int ledPin = 13;    // built-in LED on Uno board
+
+bool buttonPressed = false;
+bool ledState = LOW;
+unsigned long ms;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("\nHello\n");
+  
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  attachInterrupt(0, buttonISR, FALLING);
+  
+  ms = millis();
+}
+
+void buttonISR() { buttonPressed = true; }
+
+void loop() {
+  if (buttonPressed) {
+    delay(10);     // debounce button press
+    while (!digitalRead(buttonPin)) {}    // wait for it to be released
+    delay(10);     // debounce button release
+    digitalWrite(ledPin, LOW);    // turn off LED
+    ledState = LOW;
+
+    Serial.println("Going to sleep...");
+    Serial.flush();
+    gotoSleep();    // function to put the processor to sleep; a button press will wake it up
+
+    delay(10);     // debounce button press
+    while (!digitalRead(buttonPin)) {}    // wait for it to be released
+    delay(10);     // debounce button release
+    buttonPressed = false;
+    //Waking up
+    
+    Serial.println("Awake!");
+    Serial.flush();*/
+    
+  }
+  
+  if ((millis() - ms) > 250) {    // when awake, toggle the LED every 250 ms
+    ms = millis();
+    if (ledState == LOW) {
+      digitalWrite(ledPin, HIGH);
+      ledState = HIGH;
+    } else {
+      digitalWrite(ledPin, LOW);
+      ledState = LOW;
+    }
+  }
+}
+
+void gotoSleep()
+{
+  set_sleep_mode (SLEEP_MODE_PWR_DOWN);
+  noInterrupts();           // timed sequence follows
+  sleep_enable();
+  interrupts();             // guarantees next instruction executed
+  sleep_cpu();              // nighty-night!
+  sleep_disable();          // awake again -- cancel sleep as a precaution
+}
