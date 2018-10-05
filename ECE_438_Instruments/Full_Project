@@ -1,0 +1,138 @@
+/*
+ Full Temp sensor project that powers down lcd and put ardunio into sleep mode on button push
+ writer second pin to the very right sideof the lcd screen(when looking at the lcd screen with
+ the pins at the top) to D6 to turn the screen on and off.
+ */
+
+
+#include <math.h>
+#include <LiquidCrystal.h>
+#include <avr/sleep.h>
+
+// connect a button between pin 2 and ground
+
+const int buttonPin = 2;  // int 0 pin, connected to button
+const int ledPin = 13;    // built-in LED on Uno board
+
+bool buttonPressed = false;
+bool ledState = LOW;
+unsigned long ms;
+
+//Tmepstuff
+int ThermistorPin = 0;
+int Vo;
+float R1 = 10000;
+float logR2, R2, T;
+float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
+LiquidCrystal lcd(12,11,5,4,3,7);
+
+
+
+void setup() {
+  //Serial.begin(115200);
+  //Serial.println("\nHello\n");
+  lcd.begin(16, 2);
+  pinMode(6,OUTPUT);
+  digitalWrite(6,LOW);
+  pinMode(8,OUTPUT);
+  pinMode(0,INPUT);
+  digitalWrite(8,1);
+  pinMode(buttonPin, INPUT_PULLUP);
+  
+  attachInterrupt(0, buttonISR, FALLING);
+  
+  ms = millis();
+}
+
+void buttonISR() { buttonPressed = true; }
+
+void loop() {
+  if (buttonPressed) {
+    delay(10);     // debounce button press
+    while (!digitalRead(buttonPin)) {}    // wait for it to be released
+    delay(10);     // debounce button release
+    digitalWrite(ledState,LOW); // turn off LED
+    digitalWrite(6, LOW);    
+    ledState = LOW;
+
+    //Serial.println("Going to sleep...");
+   // Serial.flush();
+    lcd.flush();
+    
+    gotoSleep();    // function to put the processor to sleep; a button press will wake it up
+
+    delay(10);     // debounce button press
+    while (!digitalRead(buttonPin)) {}    // wait for it to be released
+    delay(10);     // debounce button release
+    buttonPressed = false;
+    //Waking up
+    
+    
+   /* Serial.println("Awake!");
+    Serial.flush();*/
+      lcd.flush();
+    
+  }
+  digitalWrite(6,HIGH);
+   Vo = analogRead(ThermistorPin);
+  R2 = R1 * (1023.0 / (float)Vo - 1.0);
+  logR2 = log(R2);
+  T = (1.0 / (c1 + c2*logR2 + c3*logR2*logR2*logR2));
+  T = T - 273.15;
+ 
+  if (digitalRead(8) == 1)
+  {
+   /* Serial.print("Temperature: "); 
+    Serial.print(T);
+    Serial.println(" C");*/
+     // lcd.print("Temp = ");
+      lcd.print(T);   
+      lcd.print(" C");
+      delay(1000);
+      lcd.clear();
+     
+
+  }
+ if (digitalRead(8) == 0){
+ 
+  T = (T * 9.0)/ 5.0 + 32.0; 
+
+  /*M
+  Serial.print("Temperature: "); 
+  Serial.print(T);
+  Serial.println(" F"); 
+  delay(1000);*/
+
+  //lcd.print("Temp = ");
+  lcd.print(T);   
+  lcd.print(" F");
+  delay(500);
+  lcd.clear();
+    
+  }
+  
+  
+
+
+
+  /*if ((millis() - ms) > 250) {    // when awake, toggle the LED every 250 ms
+    ms = millis();
+    if (ledState == LOW) {
+      digitalWrite(ledPin, HIGH);
+      ledState = HIGH;
+    } else {
+      digitalWrite(ledPin, LOW);
+      ledState = LOW;
+    }
+  }*/
+}
+
+void gotoSleep()
+{
+  set_sleep_mode (SLEEP_MODE_PWR_DOWN);
+  noInterrupts();           // timed sequence follows
+  sleep_enable();
+  interrupts();             // guarantees next instruction executed
+  sleep_cpu();              // nighty-night!
+  sleep_disable();          // awake again -- cancel sleep as a precaution
+}
